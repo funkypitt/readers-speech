@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The sibling apps, so that one can ask the other for a model it already holds. -->
+    <queries>
+        <package android:name="com.freedomfighter.readersaudio" />
+        <package android:name="com.freedomfighter.readersrecorder" />
+    </queries>
+    <application>
+        <!-- Exported, but the provider itself refuses any caller not signed with our key: a
+             <permission> would do the same and would refuse to INSTALL a debug build beside a
+             release one, which is a trap for the developer and says nothing to the user. -->
+        <provider
+            android:name="com.freedomfighter.readers.speech.share.ModelProvider"
+            android:authorities="${applicationId}.models"
+            android:exported="true" />
+    </application>
+</manifest>
