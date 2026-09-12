@@ -605,6 +605,24 @@ static wchar_t * ggml_mbstowcs(const char * mbs) {
 #endif
 
 FILE * ggml_fopen(const char * fname, const char * mode) {
+#if !defined(_WIN32)
+    // Reader's apps: a model handed over by the sibling app arrives as a file descriptor, and the
+    // path "/proc/self/fd/N" names it. Re-opening that path is a new open of another app's private
+    // file, which SELinux refuses; the descriptor itself may be read. So the stream is made from a
+    // duplicate of the descriptor and rewound, and nothing is opened again.
+    if (strncmp(fname, "/proc/self/fd/", 14) == 0) {
+        char * end = NULL;
+        long fd = strtol(fname + 14, &end, 10);
+        if (end && *end == 0 && fd >= 0) {
+            int dupfd = dup((int) fd);
+            if (dupfd < 0) return NULL;
+            FILE * f = fdopen(dupfd, mode);
+            if (!f) { close(dupfd); return NULL; }
+            fseek(f, 0, SEEK_SET);
+            return f;
+        }
+    }
+#endif
 #ifdef _WIN32
     FILE * file = NULL;
 

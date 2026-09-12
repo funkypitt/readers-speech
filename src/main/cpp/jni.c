@@ -2,6 +2,7 @@
 // read the segments back, report progress, allow a cancel. Adapted from whisper.cpp's
 // Android example (MIT).
 #include <jni.h>
+#include <unistd.h>
 #include <android/log.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,13 +25,42 @@ static bool on_abort(void * user) {
     return atomic_load(&g_abort);
 }
 
+
+/* A model handed over by the sibling app is a file descriptor named "/proc/self/fd/N". Opening
+ * that path again is a new open of another app's private file, which SELinux refuses, while the
+ * descriptor itself may be read: so the model is read through whisper's loader interface, from a
+ * duplicate of the descriptor, rewound. */
+struct fd_reader { int fd; int eof; };
+static size_t fd_read(void * ctx, void * out, size_t n) {
+    struct fd_reader * r = (struct fd_reader *) ctx;
+    size_t got = 0;
+    while (got < n) {
+        ssize_t k = read(r->fd, (char *) out + got, n - got);
+        if (k <= 0) { r->eof = 1; break; }
+        got += (size_t) k;
+    }
+    return got;
+}
+static bool fd_eof(void * ctx) { return ((struct fd_reader *) ctx)->eof != 0; }
+static void fd_close(void * ctx) { struct fd_reader * r = (struct fd_reader *) ctx; close(r->fd); free(r); }
+static struct whisper_context * init_from_fd(const char * path, struct whisper_context_params cp) {
+    int fd = dup(atoi(path + 14));
+    if (fd < 0) return NULL;
+    lseek(fd, 0, SEEK_SET);
+    struct fd_reader * r = malloc(sizeof *r);
+    if (!r) { close(fd); return NULL; }
+    r->fd = fd; r->eof = 0;
+    struct whisper_model_loader loader = { r, fd_read, fd_eof, fd_close };
+    return whisper_init_with_params(&loader, cp);
+}
+
 JNIEXPORT jlong JNICALL
 Java_com_freedomfighter_readers_speech_whisper_WhisperLib_initContext(JNIEnv *env, jclass cls, jstring path) {
     (void) cls;
     const char *p = (*env)->GetStringUTFChars(env, path, NULL);
     struct whisper_context_params cp = whisper_context_default_params();
     cp.use_gpu = false;
-    struct whisper_context *ctx = whisper_init_from_file_with_params(p, cp);
+    struct whisper_context *ctx = strncmp(p, "/proc/self/fd/", 14) == 0 ? init_from_fd(p, cp) : whisper_init_from_file_with_params(p, cp);
     (*env)->ReleaseStringUTFChars(env, path, p);
     return (jlong) ctx;
 }
