@@ -18,7 +18,7 @@ import android.util.Log
  * said (not "the speaker says", the ideas themselves), the paragraphs — in order — give the theme
  * of the whole talk in two sentences, and then, with the theme in front of it and the paragraphs
  * under it, the model writes the points of the whole talk from beginning to end. A talk too long
- * for its paragraphs to fit the context is folded once more, three paragraphs into one. The
+ * for its paragraphs to fit the context is folded once more, two paragraphs into one. The
  * result is the theme, then the points, and it covers the talk instead of its opening.
  */
 object Summariser {
@@ -40,12 +40,12 @@ object Summariser {
         "ru" to "Вот часть %1\$d из %2\$d расшифровки беседы. Запиши, что в ней говорится, одним абзацем не более 120 слов, в виде простых утверждений: не «докладчик говорит», а сами мысли и к чему они ведут. Больше ничего не пиши.\n\nРАСШИФРОВКА:\n%3\$s",
     )
     private val GROUP = mapOf(
-        "en" to "Here are, in order, notes on consecutive parts of a talk. Merge them into one paragraph of at most 150 words that keeps the thread of the argument. Write nothing else.\n\nNOTES:\n%s",
-        "fr" to "Voici, dans l'ordre, des notes sur des parties consécutives d'une causerie. Fusionne-les en un paragraphe de 150 mots au plus qui garde le fil du raisonnement. N'écris rien d'autre.\n\nNOTES :\n%s",
-        "de" to "Hier sind, der Reihe nach, Notizen zu aufeinanderfolgenden Teilen eines Vortrags. Fasse sie zu einem Absatz von höchstens 150 Wörtern zusammen, der den Faden der Argumentation behält. Schreibe sonst nichts.\n\nNOTIZEN:\n%s",
-        "es" to "Estas son, en orden, notas sobre partes consecutivas de una charla. Fúndelas en un párrafo de 150 palabras como máximo que conserve el hilo del razonamiento. No escribas nada más.\n\nNOTAS:\n%s",
-        "pt" to "Estas são, por ordem, notas sobre partes consecutivas de uma palestra. Funde-as num parágrafo de 150 palavras no máximo que mantenha o fio do raciocínio. Não escrevas mais nada.\n\nNOTAS:\n%s",
-        "ru" to "Вот по порядку заметки о следующих друг за другом частях беседы. Объедини их в один абзац не более 150 слов, сохранив ход рассуждения. Больше ничего не пиши.\n\nЗАМЕТКИ:\n%s",
+        "en" to "Here are, in order, notes on two consecutive parts of a talk. Merge them into one paragraph of at most 160 words that keeps the thread of the argument. Write nothing else.\n\nNOTES:\n%s",
+        "fr" to "Voici, dans l'ordre, des notes sur deux parties consécutives d'une causerie. Fusionne-les en un paragraphe de 160 mots au plus qui garde le fil du raisonnement. N'écris rien d'autre.\n\nNOTES :\n%s",
+        "de" to "Hier sind, der Reihe nach, Notizen zu zwei aufeinanderfolgenden Teilen eines Vortrags. Fasse sie zu einem Absatz von höchstens 160 Wörtern zusammen, der den Faden der Argumentation behält. Schreibe sonst nichts.\n\nNOTIZEN:\n%s",
+        "es" to "Estas son, en orden, notas sobre dos partes consecutivas de una charla. Fúndelas en un párrafo de 160 palabras como máximo que conserve el hilo del razonamiento. No escribas nada más.\n\nNOTAS:\n%s",
+        "pt" to "Estas são, por ordem, notas sobre duas partes consecutivas de uma palestra. Funde-as num parágrafo de 160 palavras no máximo que mantenha o fio do raciocínio. Não escrevas mais nada.\n\nNOTAS:\n%s",
+        "ru" to "Вот по порядку заметки о двух следующих друг за другом частях беседы. Объедини их в один абзац не более 160 слов, сохранив ход рассуждения. Больше ничего не пиши.\n\nЗАМЕТКИ:\n%s",
     )
     private val THEME = mapOf(
         "en" to "Here are, in order, notes on the parts of a talk. In two sentences, say what the talk is about and what the speaker wants the listener to understand. Write nothing else.\n\nNOTES:\n%s",
@@ -146,14 +146,15 @@ object Summariser {
             }
             if (notes.isEmpty()) return null
 
-            // Too long to be read at once: three notes into one, until they fit. A two-hour talk
-            // takes one such fold; the progress bar stretches for the extra calls.
+            // Too long to be read at once: two notes into one, until they fit. Two at a time, not
+            // three — measured on a two-hour recording, three into one lost its second half. The
+            // progress bar stretches for the extra calls.
             while (notes.sumOf { words(it) } > NOTES_BUDGET && notes.size > 2) {
-                val groups = notes.chunked(3)
+                val groups = notes.chunked(2)
                 total += groups.size
                 notes = groups.mapNotNull { g ->
                     if (cancelled()) { session.cancel(); return null }
-                    val a = session.run(GROUP[lang]!!.format(g.joinToString("\n\n")), maxTokens = 300, onProgress = ::step)
+                    val a = session.run(GROUP[lang]!!.format(g.joinToString("\n\n")), maxTokens = 320, onProgress = ::step)
                     done++
                     a?.trim() ?: g.joinToString(" ").take(900)
                 }
