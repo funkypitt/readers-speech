@@ -108,6 +108,13 @@ object Summariser {
 
     private fun words(s: String) = s.split(Regex("\\s+")).count { it.isNotBlank() }
 
+    /** A note without the preamble a small model sometimes opens with ("Here are the ideas of this part:"). */
+    private fun unprefaced(answer: String): String {
+        val t = answer.trim()
+        val first = t.lineSequence().first().trim()
+        return if (first.endsWith(":") && first.length < 120) t.removePrefix(first).trim() else t
+    }
+
     /**
      * The theme and the points of [transcript] — the two sentences, a blank line, then one point
      * per line — or null when cancelled, when the model cannot be loaded, or when nothing usable
@@ -140,7 +147,7 @@ object Summariser {
                     val answer = session.run(PART[lang]!!.format(i + 1, parts.size, part), maxTokens = 256, onProgress = ::step)
                     done++
                     if (answer == null) { Log.e(TAG, "part ${i + 1}/${parts.size}: ${session.why()}"); return@forEachIndexed }
-                    out += answer.trim()
+                    out += unprefaced(answer)
                 }
                 out
             }

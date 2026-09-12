@@ -66,19 +66,25 @@ static int out_push(struct out * o, const char * s, int n) {
  * Ollama on the workstation and the same model on the phone are not the same model at all.
  * Returns a buffer to free, or NULL when the model carries no template (then the raw text is used).
  */
+/* The system line Qwen was trained with and that Ollama sends by default. Without it the same
+ * weights answer differently: measured 2026-09-12, the phone turned "say in two sentences what
+ * the talk is about" into a per-part paraphrase while the workstation, through Ollama, answered
+ * the question. The bench on the workstation and the phone must be the same model. */
+static const char * SYSTEM_LINE = "You are Qwen, created by Alibaba Cloud. You are a helpful assistant.";
+
 static char * wrap_in_chat_template(struct llama_model * model, const char * text) {
     const char * tmpl = llama_model_chat_template(model, NULL);
     if (!tmpl) return NULL;
-    struct llama_chat_message msg = { "user", text };
+    struct llama_chat_message msgs[2] = { { "system", SYSTEM_LINE }, { "user", text } };
     int cap = (int) strlen(text) * 2 + 512;
     char * buf = malloc((size_t) cap);
     if (!buf) return NULL;
-    int n = llama_chat_apply_template(tmpl, &msg, 1, true, buf, cap);
+    int n = llama_chat_apply_template(tmpl, msgs, 2, true, buf, cap);
     if (n > cap) {                                   // the template asked for more room
         char * bigger = realloc(buf, (size_t) n + 1);
         if (!bigger) { free(buf); return NULL; }
         buf = bigger; cap = n + 1;
-        n = llama_chat_apply_template(tmpl, &msg, 1, true, buf, cap);
+        n = llama_chat_apply_template(tmpl, msgs, 2, true, buf, cap);
     }
     if (n <= 0) { free(buf); return NULL; }
     buf[n < cap ? n : cap - 1] = 0;
