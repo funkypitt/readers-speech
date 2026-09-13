@@ -22,10 +22,22 @@ object Prompts {
     /** The style sentence; none when the language is left to detection. */
     fun style(language: String?): String = language?.let { STYLE[it] } ?: ""
 
-    /** For a piece after the first: the style sentence, then the end of what came before, so the context runs on. */
+    /**
+     * For a piece after the first: the style sentence, then the end of what came before, so the
+     * context runs on — unless that end is whisper repeating itself, in which case handing it
+     * over would carry the stutter into the next five minutes. Then the style sentence alone.
+     */
     fun forPiece(language: String?, previous: String): String {
         val tail = if (previous.length <= 240) previous else previous.takeLast(240).substringAfter(' ')
-        return listOf(style(language), tail.trim()).filter { it.isNotBlank() }.joinToString(" ")
+        return listOf(style(language), if (stutters(tail)) "" else tail.trim()).filter { it.isNotBlank() }.joinToString(" ")
+    }
+
+    /** Whether a text ends by saying the same sentence twice. */
+    fun stutters(text: String): Boolean {
+        val sentences = text.split(Regex("(?<=[.!?…])\\s+")).map { it.trim().lowercase() }.filter { it.length > 8 }
+        if (sentences.size < 2) return false
+        val last = sentences.last()
+        return sentences.dropLast(1).any { it == last }
     }
 }
 
@@ -41,9 +53,14 @@ object Paragraphs {
         val out = ArrayList<String>()
         val cur = StringBuilder()
         var lastEnd = -1L
+        var previous = ""
         for (s in segments) {
             val text = s.text.trim()
             if (text.isEmpty()) continue
+            // whisper, once it repeats a sentence, may repeat it for minutes: once is enough
+            val key = text.lowercase().replace(Regex("[^\\p{L}\\p{N}]+"), " ").trim()
+            if (key == previous) continue
+            previous = key
             val gap = if (lastEnd < 0) 0L else s.startMs - lastEnd
             val len = cur.length
             val ended = len > 0 && endsSentence(cur)

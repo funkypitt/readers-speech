@@ -91,7 +91,12 @@ Java_com_freedomfighter_readers_speech_whisper_WhisperLib_fullTranscribe(JNIEnv 
     params.language = (lang && lang[0]) ? lang : "auto";
     params.detect_language = false;
     params.n_threads = threads;
-    params.no_context = false;
+    // Each thirty-second window is decoded with the caller's prompt only, not with the text of the
+    // window before: with that text carried along, whisper that starts repeating a sentence repeats
+    // it for the rest of the piece ("How do we know how to make sense of self?" four hundred times
+    // in one talk on a phone). The style sentence and the tail of the previous piece still come
+    // through the prompt, so punctuation does not suffer.
+    params.no_context = true;
     params.single_segment = false;
     params.suppress_blank = true;
     params.suppress_nst = true;

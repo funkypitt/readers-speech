@@ -37,36 +37,36 @@ object Summariser {
     private const val TAG = "ReadersLlama"
 
     private val PART = mapOf(
-        "en" to "Here is part %1\$d of %2\$d of the transcript of a talk. Note what is said in this part, in one paragraph of at most 120 words, as plain statements of the ideas: not \"the speaker says\", just the ideas themselves, and what they lead to. Write nothing else.\n\nTRANSCRIPT:\n%3\$s",
-        "fr" to "Voici la partie %1\$d sur %2\$d de la transcription d'une causerie. Note ce qui y est dit, en un paragraphe de 120 mots au plus, sous forme d'affirmations simples : pas « l'orateur dit », seulement les idées elles-mêmes et où elles mènent. N'écris rien d'autre.\n\nTRANSCRIPTION :\n%3\$s",
-        "de" to "Hier ist Teil %1\$d von %2\$d der Abschrift eines Vortrags. Halte fest, was in diesem Teil gesagt wird, in einem Absatz von höchstens 120 Wörtern, als schlichte Aussagen: nicht „der Redner sagt“, nur die Gedanken selbst und wohin sie führen. Schreibe sonst nichts.\n\nABSCHRIFT:\n%3\$s",
-        "es" to "Esta es la parte %1\$d de %2\$d de la transcripción de una charla. Anota lo que se dice en esta parte, en un párrafo de 120 palabras como máximo, como afirmaciones simples: no «el orador dice», solo las ideas mismas y adónde llevan. No escribas nada más.\n\nTRANSCRIPCIÓN:\n%3\$s",
-        "pt" to "Esta é a parte %1\$d de %2\$d da transcrição de uma palestra. Anota o que é dito nesta parte, num parágrafo de 120 palavras no máximo, como afirmações simples: não «o orador diz», apenas as ideias em si e aonde levam. Não escrevas mais nada.\n\nTRANSCRIÇÃO:\n%3\$s",
-        "ru" to "Вот часть %1\$d из %2\$d расшифровки беседы. Запиши, что в ней говорится, одним абзацем не более 120 слов, в виде простых утверждений: не «докладчик говорит», а сами мысли и к чему они ведут. Больше ничего не пиши.\n\nРАСШИФРОВКА:\n%3\$s",
+        "en" to "Here is part %1\$d of %2\$d of the transcript of a talk. Note what is said in this part, in one paragraph of at most 120 words, as plain statements of the ideas: not \"the speaker says\", just the ideas themselves, and what they lead to. Write nothing else. Answer in English, even if the transcript is in another language.\n\nTRANSCRIPT:\n%3\$s",
+        "fr" to "Voici la partie %1\$d sur %2\$d de la transcription d'une causerie. Note ce qui y est dit, en un paragraphe de 120 mots au plus, sous forme d'affirmations simples : pas « l'orateur dit », seulement les idées elles-mêmes et où elles mènent. N'écris rien d'autre. Réponds en français, même si la transcription est dans une autre langue.\n\nTRANSCRIPTION :\n%3\$s",
+        "de" to "Hier ist Teil %1\$d von %2\$d der Abschrift eines Vortrags. Halte fest, was in diesem Teil gesagt wird, in einem Absatz von höchstens 120 Wörtern, als schlichte Aussagen: nicht „der Redner sagt“, nur die Gedanken selbst und wohin sie führen. Schreibe sonst nichts. Antworte auf Deutsch, auch wenn die Abschrift in einer anderen Sprache ist.\n\nABSCHRIFT:\n%3\$s",
+        "es" to "Esta es la parte %1\$d de %2\$d de la transcripción de una charla. Anota lo que se dice en esta parte, en un párrafo de 120 palabras como máximo, como afirmaciones simples: no «el orador dice», solo las ideas mismas y adónde llevan. No escribas nada más. Responde en español, aunque la transcripción esté en otro idioma.\n\nTRANSCRIPCIÓN:\n%3\$s",
+        "pt" to "Esta é a parte %1\$d de %2\$d da transcrição de uma palestra. Anota o que é dito nesta parte, num parágrafo de 120 palavras no máximo, como afirmações simples: não «o orador diz», apenas as ideias em si e aonde levam. Não escrevas mais nada. Responde em português, mesmo que a transcrição esteja noutra língua.\n\nTRANSCRIÇÃO:\n%3\$s",
+        "ru" to "Вот часть %1\$d из %2\$d расшифровки беседы. Запиши, что в ней говорится, одним абзацем не более 120 слов, в виде простых утверждений: не «докладчик говорит», а сами мысли и к чему они ведут. Больше ничего не пиши. Отвечай по-русски, даже если расшифровка на другом языке.\n\nРАСШИФРОВКА:\n%3\$s",
     )
     private val GROUP = mapOf(
-        "en" to "Here are, in order, notes on two consecutive parts of a talk. Merge them into one paragraph of at most 160 words that keeps the thread of the argument. Write nothing else.\n\nNOTES:\n%s",
-        "fr" to "Voici, dans l'ordre, des notes sur deux parties consécutives d'une causerie. Fusionne-les en un paragraphe de 160 mots au plus qui garde le fil du raisonnement. N'écris rien d'autre.\n\nNOTES :\n%s",
-        "de" to "Hier sind, der Reihe nach, Notizen zu zwei aufeinanderfolgenden Teilen eines Vortrags. Fasse sie zu einem Absatz von höchstens 160 Wörtern zusammen, der den Faden der Argumentation behält. Schreibe sonst nichts.\n\nNOTIZEN:\n%s",
-        "es" to "Estas son, en orden, notas sobre dos partes consecutivas de una charla. Fúndelas en un párrafo de 160 palabras como máximo que conserve el hilo del razonamiento. No escribas nada más.\n\nNOTAS:\n%s",
-        "pt" to "Estas são, por ordem, notas sobre duas partes consecutivas de uma palestra. Funde-as num parágrafo de 160 palavras no máximo que mantenha o fio do raciocínio. Não escrevas mais nada.\n\nNOTAS:\n%s",
-        "ru" to "Вот по порядку заметки о двух следующих друг за другом частях беседы. Объедини их в один абзац не более 160 слов, сохранив ход рассуждения. Больше ничего не пиши.\n\nЗАМЕТКИ:\n%s",
+        "en" to "Here are, in order, notes on two consecutive parts of a talk. Merge them into one paragraph of at most 160 words that keeps the thread of the argument. Write nothing else. Answer in English, even if the transcript is in another language.\n\nNOTES:\n%s",
+        "fr" to "Voici, dans l'ordre, des notes sur deux parties consécutives d'une causerie. Fusionne-les en un paragraphe de 160 mots au plus qui garde le fil du raisonnement. N'écris rien d'autre. Réponds en français, même si la transcription est dans une autre langue.\n\nNOTES :\n%s",
+        "de" to "Hier sind, der Reihe nach, Notizen zu zwei aufeinanderfolgenden Teilen eines Vortrags. Fasse sie zu einem Absatz von höchstens 160 Wörtern zusammen, der den Faden der Argumentation behält. Schreibe sonst nichts. Antworte auf Deutsch, auch wenn die Abschrift in einer anderen Sprache ist.\n\nNOTIZEN:\n%s",
+        "es" to "Estas son, en orden, notas sobre dos partes consecutivas de una charla. Fúndelas en un párrafo de 160 palabras como máximo que conserve el hilo del razonamiento. No escribas nada más. Responde en español, aunque la transcripción esté en otro idioma.\n\nNOTAS:\n%s",
+        "pt" to "Estas são, por ordem, notas sobre duas partes consecutivas de uma palestra. Funde-as num parágrafo de 160 palavras no máximo que mantenha o fio do raciocínio. Não escrevas mais nada. Responde em português, mesmo que a transcrição esteja noutra língua.\n\nNOTAS:\n%s",
+        "ru" to "Вот по порядку заметки о двух следующих друг за другом частях беседы. Объедини их в один абзац не более 160 слов, сохранив ход рассуждения. Больше ничего не пиши. Отвечай по-русски, даже если расшифровка на другом языке.\n\nЗАМЕТКИ:\n%s",
     )
     private val THEME = mapOf(
-        "en" to "Here are, in order, notes on the parts of a talk. In two sentences, say what the talk is about and what the speaker wants the listener to understand. Write nothing else.\n\nNOTES:\n%s",
-        "fr" to "Voici, dans l'ordre, des notes sur les parties d'une causerie. En deux phrases, dis de quoi parle la causerie et ce que l'orateur veut faire comprendre. N'écris rien d'autre.\n\nNOTES :\n%s",
-        "de" to "Hier sind, der Reihe nach, Notizen zu den Teilen eines Vortrags. Sage in zwei Sätzen, worum es in dem Vortrag geht und was der Redner dem Zuhörer verständlich machen will. Schreibe sonst nichts.\n\nNOTIZEN:\n%s",
-        "es" to "Estas son, en orden, notas sobre las partes de una charla. En dos frases, di de qué trata la charla y qué quiere el orador que el oyente entienda. No escribas nada más.\n\nNOTAS:\n%s",
-        "pt" to "Estas são, por ordem, notas sobre as partes de uma palestra. Em duas frases, diz de que trata a palestra e o que o orador quer que o ouvinte compreenda. Não escrevas mais nada.\n\nNOTAS:\n%s",
-        "ru" to "Вот по порядку заметки о частях беседы. В двух предложениях скажи, о чём беседа и что докладчик хочет донести до слушателя. Больше ничего не пиши.\n\nЗАМЕТКИ:\n%s",
+        "en" to "Here are, in order, notes on the parts of a talk. In two sentences, say what the talk is about and what the speaker wants the listener to understand. Write nothing else. Answer in English, even if the transcript is in another language.\n\nNOTES:\n%s",
+        "fr" to "Voici, dans l'ordre, des notes sur les parties d'une causerie. En deux phrases, dis de quoi parle la causerie et ce que l'orateur veut faire comprendre. N'écris rien d'autre. Réponds en français, même si la transcription est dans une autre langue.\n\nNOTES :\n%s",
+        "de" to "Hier sind, der Reihe nach, Notizen zu den Teilen eines Vortrags. Sage in zwei Sätzen, worum es in dem Vortrag geht und was der Redner dem Zuhörer verständlich machen will. Schreibe sonst nichts. Antworte auf Deutsch, auch wenn die Abschrift in einer anderen Sprache ist.\n\nNOTIZEN:\n%s",
+        "es" to "Estas son, en orden, notas sobre las partes de una charla. En dos frases, di de qué trata la charla y qué quiere el orador que el oyente entienda. No escribas nada más. Responde en español, aunque la transcripción esté en otro idioma.\n\nNOTAS:\n%s",
+        "pt" to "Estas são, por ordem, notas sobre as partes de uma palestra. Em duas frases, diz de que trata a palestra e o que o orador quer que o ouvinte compreenda. Não escrevas mais nada. Responde em português, mesmo que a transcrição esteja noutra língua.\n\nNOTAS:\n%s",
+        "ru" to "Вот по порядку заметки о частях беседы. В двух предложениях скажи, о чём беседа и что докладчик хочет донести до слушателя. Больше ничего не пиши. Отвечай по-русски, даже если расшифровка на другом языке.\n\nЗАМЕТКИ:\n%s",
     )
     private val POINTS = mapOf(
-        "en" to "Here is what a talk is about:\n%1\$s\n\nAnd here are, in order, notes on parts %2\$s of that talk:\n%3\$s\n\nWrite the %4\$d main points of these parts, in order, one per line, each line starting with \"- \". Each point states an idea as a plain sentence, as the speaker would put it — never \"the talk discusses\" or \"the speaker emphasizes\". Write nothing else.",
-        "fr" to "Voici de quoi parle une causerie :\n%1\$s\n\nEt voici, dans l'ordre, des notes sur les parties %2\$s de cette causerie :\n%3\$s\n\nÉcris les %4\$d points principaux de ces parties, dans l'ordre, un par ligne, chaque ligne commençant par « - ». Chaque point énonce une idée en une phrase complète, comme l'orateur la dirait — jamais « la causerie aborde » ni « l'orateur insiste ». N'écris rien d'autre.",
-        "de" to "Darum geht es in einem Vortrag:\n%1\$s\n\nUnd hier sind, der Reihe nach, Notizen zu den Teilen %2\$s dieses Vortrags:\n%3\$s\n\nSchreibe die %4\$d wichtigsten Punkte dieser Teile, der Reihe nach, einen pro Zeile, jede Zeile beginnt mit „- “. Jeder Punkt formuliert einen Gedanken als ganzen Satz, so wie der Redner ihn sagen würde — nie „der Vortrag behandelt“ oder „der Redner betont“. Schreibe sonst nichts.",
-        "es" to "De esto trata una charla:\n%1\$s\n\nY estas son, en orden, notas sobre las partes %2\$s de esa charla:\n%3\$s\n\nEscribe los %4\$d puntos principales de estas partes, en orden, uno por línea, cada línea empezando por «- ». Cada punto enuncia una idea como una frase completa, tal como la diría el orador — nunca «la charla trata» ni «el orador insiste». No escribas nada más.",
-        "pt" to "É disto que trata uma palestra:\n%1\$s\n\nE estas são, por ordem, notas sobre as partes %2\$s dessa palestra:\n%3\$s\n\nEscreve os %4\$d pontos principais destas partes, por ordem, um por linha, cada linha a começar por «- ». Cada ponto enuncia uma ideia numa frase completa, como o orador a diria — nunca «a palestra aborda» nem «o orador sublinha». Não escrevas mais nada.",
-        "ru" to "Вот о чём беседа:\n%1\$s\n\nА вот по порядку заметки о частях %2\$s этой беседы:\n%3\$s\n\nНапиши %4\$d основных мыслей этих частей, по порядку, по одной в строке, каждая строка начинается с «- ». Каждая мысль — законченное предложение, как сказал бы сам докладчик, никогда «в беседе говорится» или «докладчик подчёркивает». Больше ничего не пиши.",
+        "en" to "Here is what a talk is about:\n%1\$s\n\nAnd here are, in order, notes on parts %2\$s of that talk:\n%3\$s\n\nWrite the %4\$d main points of these parts, in order, one per line, each line starting with \"- \". Each point states an idea as a plain sentence, as the speaker would put it — never \"the talk discusses\" or \"the speaker emphasizes\". Write nothing else. Answer in English, even if the transcript is in another language.",
+        "fr" to "Voici de quoi parle une causerie :\n%1\$s\n\nEt voici, dans l'ordre, des notes sur les parties %2\$s de cette causerie :\n%3\$s\n\nÉcris les %4\$d points principaux de ces parties, dans l'ordre, un par ligne, chaque ligne commençant par « - ». Chaque point énonce une idée en une phrase complète, comme l'orateur la dirait — jamais « la causerie aborde » ni « l'orateur insiste ». N'écris rien d'autre. Réponds en français, même si la transcription est dans une autre langue.",
+        "de" to "Darum geht es in einem Vortrag:\n%1\$s\n\nUnd hier sind, der Reihe nach, Notizen zu den Teilen %2\$s dieses Vortrags:\n%3\$s\n\nSchreibe die %4\$d wichtigsten Punkte dieser Teile, der Reihe nach, einen pro Zeile, jede Zeile beginnt mit „- “. Jeder Punkt formuliert einen Gedanken als ganzen Satz, so wie der Redner ihn sagen würde — nie „der Vortrag behandelt“ oder „der Redner betont“. Schreibe sonst nichts. Antworte auf Deutsch, auch wenn die Abschrift in einer anderen Sprache ist.",
+        "es" to "De esto trata una charla:\n%1\$s\n\nY estas son, en orden, notas sobre las partes %2\$s de esa charla:\n%3\$s\n\nEscribe los %4\$d puntos principales de estas partes, en orden, uno por línea, cada línea empezando por «- ». Cada punto enuncia una idea como una frase completa, tal como la diría el orador — nunca «la charla trata» ni «el orador insiste». No escribas nada más. Responde en español, aunque la transcripción esté en otro idioma.",
+        "pt" to "É disto que trata uma palestra:\n%1\$s\n\nE estas são, por ordem, notas sobre as partes %2\$s dessa palestra:\n%3\$s\n\nEscreve os %4\$d pontos principais destas partes, por ordem, um por linha, cada linha a começar por «- ». Cada ponto enuncia uma ideia numa frase completa, como o orador a diria — nunca «a palestra aborda» nem «o orador sublinha». Não escrevas mais nada. Responde em português, mesmo que a transcrição esteja noutra língua.",
+        "ru" to "Вот о чём беседа:\n%1\$s\n\nА вот по порядку заметки о частях %2\$s этой беседы:\n%3\$s\n\nНапиши %4\$d основных мыслей этих частей, по порядку, по одной в строке, каждая строка начинается с «- ». Каждая мысль — законченное предложение, как сказал бы сам докладчик, никогда «в беседе говорится» или «докладчик подчёркивает». Больше ничего не пиши. Отвечай по-русски, даже если расшифровка на другом языке.",
     )
     /** "1 to 4" in each language, for the parts a points call is given. */
     private val TO = mapOf("en" to "%d to %d", "fr" to "%d à %d", "de" to "%d bis %d", "es" to "%d a %d", "pt" to "%d a %d", "ru" to "%d–%d")
@@ -86,17 +86,39 @@ object Summariser {
     /** The instruction follows the language of the recording, and falls back to English. */
     private fun tongue(language: String): String = language.lowercase().take(2).takeIf { it in PART } ?: "en"
 
-    /** Whole paragraphs, grouped into pieces of at most [WORDS_PER_PIECE] words. */
+    /**
+     * Whole paragraphs, grouped into pieces of at most [WORDS_PER_PIECE] words. A paragraph longer
+     * than a piece — a transcript from another tool may be one block — is cut at sentence ends,
+     * and a run without sentences by words, because a piece that does not fit the context is a
+     * piece the model never reads.
+     */
     fun pieces(text: String): List<String> {
         val out = mutableListOf<String>()
         val cur = StringBuilder()
         var words = 0
-        for (para in text.split("\n\n").filter { it.isNotBlank() }) {
-            val n = para.split(Regex("\\s+")).size
-            if (words > 0 && words + n > WORDS_PER_PIECE) { out += cur.toString().trim(); cur.clear(); words = 0 }
+        fun flush() { if (cur.isNotBlank()) out += cur.toString().trim(); cur.clear(); words = 0 }
+        for (para in text.split(Regex("\\n\\s*\\n")).filter { it.isNotBlank() }) {
+            val n = words(para)
+            if (n > WORDS_PER_PIECE) {
+                flush()
+                val chunk = StringBuilder(); var k = 0
+                for (sentence in para.split(Regex("(?<=[.!?…])\\s+"))) {
+                    val m = words(sentence)
+                    if (m > WORDS_PER_PIECE) {   // no sentence ends at all: by words
+                        if (chunk.isNotBlank()) { out += chunk.toString().trim(); chunk.clear(); k = 0 }
+                        sentence.split(Regex("\\s+")).chunked(WORDS_PER_PIECE).forEach { out += it.joinToString(" ") }
+                        continue
+                    }
+                    if (k > 0 && k + m > WORDS_PER_PIECE) { out += chunk.toString().trim(); chunk.clear(); k = 0 }
+                    chunk.append(sentence).append(' '); k += m
+                }
+                if (chunk.isNotBlank()) out += chunk.toString().trim()
+                continue
+            }
+            if (words > 0 && words + n > WORDS_PER_PIECE) flush()
             cur.append(para).append("\n\n"); words += n
         }
-        if (cur.isNotBlank()) out += cur.toString().trim()
+        flush()
         return out
     }
 
@@ -108,10 +130,53 @@ object Summariser {
         raw.lines()
             .map { it.trim() }
             .filter { it.startsWith("-") || it.startsWith("•") || it.startsWith("*") }
-            .map { it.removePrefix("-").removePrefix("•").removePrefix("*").trim().trim('*') }
+            .map { it.removePrefix("-").removePrefix("•").removePrefix("*").trim().trim('*').trim() }
+            .map { it.removePrefix("-").trim() }   // "- -We repeatedly ask": a dash inside the dash
+            .map(::firstSentences)
             .filter { it.length > 3 && !META.containsMatchIn(it) }
-            .distinctBy { it.lowercase() }
+            // a stub ("Each identity is born,") is a line the model broke mid-sentence: not a point
+            .filter { words(it) >= 4 && !it.trimEnd().endsWith(",") && !it.trimEnd().endsWith(";") }
+            .fold(mutableListOf<String>()) { acc, p -> if (acc.none { alike(it, p) }) acc += p; acc }
             .take(limit)
+
+    /** Words per point past which it is a paragraph dressed as a point; only its opening is kept. */
+    private const val POINT_WORDS = 45
+
+    private fun firstSentences(p: String): String {
+        if (words(p) <= POINT_WORDS) return p
+        val out = StringBuilder()
+        for (sentence in p.split(Regex("(?<=[.!?…])\\s+"))) {
+            if (out.isNotEmpty() && words(out.toString()) + words(sentence) > POINT_WORDS) break
+            out.append(sentence).append(' ')
+        }
+        return out.toString().trim().ifBlank { p }
+    }
+
+    /** Two points that say the same thing in nearly the same words: the same set of words, mostly. */
+    private fun alike(a: String, b: String): Boolean {
+        val wa = a.lowercase().split(Regex("[^\\p{L}\\p{N}]+")).filter { it.length > 2 }.toSet()
+        val wb = b.lowercase().split(Regex("[^\\p{L}\\p{N}]+")).filter { it.length > 2 }.toSet()
+        if (wa.isEmpty() || wb.isEmpty()) return a.equals(b, ignoreCase = true)
+        val shared = wa.intersect(wb).size.toDouble()
+        return shared / minOf(wa.size, wb.size) >= 0.7
+    }
+
+    /**
+     * A transcript with its stutters removed: whisper, once it starts repeating a sentence, may
+     * repeat it for minutes ("How do we know how to make sense of self?" four hundred times in one
+     * talk), and notes taken on that become that. A sentence that follows itself is kept once.
+     */
+    fun unstuttered(text: String): String {
+        val out = StringBuilder()
+        var last = ""
+        for (sentence in text.split(Regex("(?<=[.!?…])\\s+|\\n"))) {
+            val key = sentence.lowercase().replace(Regex("[^\\p{L}\\p{N}]+"), " ").trim()
+            if (key.isNotEmpty() && key == last) continue
+            if (key.isNotEmpty()) last = key
+            out.append(sentence).append(if (sentence.endsWith("\n")) "" else " ")
+        }
+        return out.toString().replace(Regex(" +\\n"), "\n").trim()
+    }
 
     private fun words(s: String) = s.split(Regex("\\s+")).count { it.isNotBlank() }
 
@@ -139,8 +204,9 @@ object Summariser {
         cancelled: () -> Boolean = { false },
     ): String? = runCatching {
         val lang = tongue(language)
-        if (words(transcript) < MIN_WORDS) return null
-        val parts = pieces(transcript)
+        val clean = unstuttered(transcript)
+        if (words(clean) < MIN_WORDS) return null
+        val parts = pieces(clean)
         val partWord = PART_WORD[lang]!!
 
         LlamaSession(modelPath).use { session ->
@@ -151,7 +217,7 @@ object Summariser {
             fun step(it: Int) = onProgress((100 * (done + it / 100f) / total).toInt().coerceIn(0, 99))
 
             // One piece: nothing to fold, the transcript itself is the note.
-            var notes: List<String> = if (parts.size == 1) listOf(transcript.trim()) else {
+            var notes: List<String> = if (parts.size == 1) listOf(clean.trim()) else {
                 val out = mutableListOf<String>()
                 parts.forEachIndexed { i, part ->
                     if (cancelled()) { session.cancel(); return null }
