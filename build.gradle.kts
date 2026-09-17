@@ -13,7 +13,9 @@ android {
     defaultConfig {
         minSdk = 26
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
-        externalNativeBuild { cmake { arguments += listOf("-DGGML_NATIVE=OFF", "-DANDROID_STL=c++_static") } }
+        // 16 KB pages (Android 15+ devices, Play requirement): NDK r27 aligns ELF segments at 4 KB
+        // unless asked; the published 1.4.1/1.8.1 .so files could not load on such phones.
+        externalNativeBuild { cmake { arguments += listOf("-DGGML_NATIVE=OFF", "-DANDROID_STL=c++_static", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON") } }
     }
 
     ndkVersion = "27.1.12297006"
