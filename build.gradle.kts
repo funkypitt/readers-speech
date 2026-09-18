@@ -13,6 +13,9 @@ android {
     defaultConfig {
         minSdk = 26
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
+        // The native path — the JNI signatures, the detector unpacked from the assets — is only
+        // ever proved on a device: see WhisperVadTest for what it needs and how it is run.
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // 16 KB pages (Android 15+ devices, Play requirement): NDK r27 aligns ELF segments at 4 KB
         // unless asked; the published 1.4.1/1.8.1 .so files could not load on such phones.
         externalNativeBuild { cmake { arguments += listOf("-DGGML_NATIVE=OFF", "-DANDROID_STL=c++_static", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON") } }
@@ -27,4 +30,6 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
 }
