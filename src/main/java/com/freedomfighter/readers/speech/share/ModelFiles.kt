@@ -26,7 +26,11 @@ class ModelHandle(val path: String, private val pfd: ParcelFileDescriptor?) : Cl
  */
 object ModelFiles {
     /** The apps that share models, by package name. */
-    val SIBLINGS = listOf("com.freedomfighter.readersaudio", "com.freedomfighter.readersrecorder")
+    val SIBLINGS = listOf(
+        "com.freedomfighter.readersaudio",
+        "com.freedomfighter.readersrecorder",
+        "com.freedomfighter.readerspodcasts",
+    )
 
     fun dir(ctx: Context): File = File(ctx.filesDir, "models").apply { mkdirs() }
     fun own(ctx: Context, name: String): File = File(dir(ctx), name)
