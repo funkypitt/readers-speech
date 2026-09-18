@@ -35,10 +35,12 @@ object Translator {
         target: String,
         onProgress: (Int) -> Unit = {},
         cancelled: () -> Boolean = { false },
+        /** Pin the weights: a whole talk is hundreds of answers, not one. */
+        keepInRam: Boolean = true,
     ): List<Block>? {
         val blocks = group(segments)
         if (blocks.isEmpty()) return emptyList()
-        LlamaSession(modelPath).use { session ->
+        LlamaSession(modelPath, keepInRam = keepInRam).use { session ->
             if (!session.loaded) throw IllegalStateException(session.why().ifBlank { "llama: model not loaded" })
             val out = ArrayList<Block>(blocks.size)
             blocks.forEachIndexed { i, block ->

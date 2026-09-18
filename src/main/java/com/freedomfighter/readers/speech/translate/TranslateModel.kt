@@ -61,6 +61,16 @@ object TranslateModel {
 
     fun roomRightNow(ctx: Context): Boolean = memory(ctx).let { !it.lowMemory && it.availMem >= MIN_FREE_RAM }
 
+    /**
+     * Whether the weights can be held in memory rather than left to be re-read from storage.
+     *
+     * A whole talk is hundreds of answers, not one: with the file-backed weights the system is
+     * free to reclaim, every word generated can cost a fresh read of a 2.5 GB file. Pinning them
+     * is only honest when the room is plainly there — the model, plus what the work itself takes.
+     */
+    fun canPinWeights(ctx: Context): Boolean =
+        memory(ctx).let { !it.lowMemory && it.availMem >= NEEDED_BYTES + 700_000_000L }
+
     /** 0–100 while the download runs, −1 otherwise. */
     val downloading = MutableStateFlow(-1)
 

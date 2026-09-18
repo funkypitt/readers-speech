@@ -11,7 +11,7 @@ import com.freedomfighter.readers.speech.whisper.preferredThreads
 object LlamaLib {
     init { Cpu.load("llama") }
 
-    @JvmStatic external fun initContext(modelPath: String, threads: Int, nCtx: Int): Long
+    @JvmStatic external fun initContext(modelPath: String, threads: Int, nCtx: Int, keepInRam: Boolean): Long
     @JvmStatic external fun freeContext(ptr: Long)
     /** One prompt, one answer; "" when cancelled, when the prompt does not fit, or on failure. */
     @JvmStatic external fun generate(ptr: Long, prompt: String, maxTokens: Int): String
@@ -26,8 +26,18 @@ object LlamaLib {
  * Failures are returned, never thrown: a recording must never lose its transcript because
  * the summary went wrong.
  */
-class LlamaSession(modelPath: String, private val nCtx: Int = CONTEXT) : AutoCloseable {
-    private val ptr = LlamaLib.initContext(modelPath, preferredThreads(), nCtx)
+/**
+ * [keepInRam] pins the weights instead of leaving them file-backed. It is the difference between
+ * a model that answers and one that crawls: measured on a Pixel on 2026-09-18, a four-billion
+ * model left file-backed produced under a word a second, because two and a half gigabytes were
+ * read back from storage for every token. Only ask for it when the phone has the room to spare.
+ */
+class LlamaSession(
+    modelPath: String,
+    private val nCtx: Int = CONTEXT,
+    keepInRam: Boolean = false,
+) : AutoCloseable {
+    private val ptr = LlamaLib.initContext(modelPath, preferredThreads(), nCtx, keepInRam)
 
     val loaded: Boolean get() = ptr != 0L
 

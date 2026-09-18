@@ -93,7 +93,7 @@ static char * wrap_in_chat_template(struct llama_model * model, const char * tex
 
 JNIEXPORT jlong JNICALL
 Java_com_freedomfighter_readers_speech_summary_LlamaLib_initContext(
-        JNIEnv *env, jclass cls, jstring path, jint threads, jint n_ctx) {
+        JNIEnv *env, jclass cls, jstring path, jint threads, jint n_ctx, jboolean keep_in_ram) {
     (void) cls;
     if (!atomic_exchange(&g_backend_ready, true)) llama_backend_init();
     g_error[0] = 0;
@@ -102,8 +102,13 @@ Java_com_freedomfighter_readers_speech_summary_LlamaLib_initContext(
 
     struct llama_model_params mp = llama_model_default_params();
     mp.n_gpu_layers = 0;                 // a phone: the processor does everything
-    mp.load_mode    = LLAMA_LOAD_MODE_MMAP;   // the weights stay file-backed, so the system can
-                                             // reclaim them instead of killing the application
+    // File-backed weights let the system reclaim them instead of killing the application, and
+    // that is the right trade for a summary of a few hundred words. For a translation it is
+    // ruinous: two and a half gigabytes are read again for every token produced, and the model
+    // answers at under a word a second. When the phone plainly has the room, the pages are
+    // pinned instead; if the kernel refuses to lock them, llama falls back to plain mmap and
+    // nothing is lost.
+    mp.load_mode = keep_in_ram ? LLAMA_LOAD_MODE_MMAP_MLOCK : LLAMA_LOAD_MODE_MMAP;
 
     struct llama_model * model = llama_model_load_from_file(p, mp);
     (*env)->ReleaseStringUTFChars(env, path, p);
@@ -132,7 +137,8 @@ Java_com_freedomfighter_readers_speech_summary_LlamaLib_initContext(
     s->model = model; s->ctx = ctx; s->sampler = smpl;
     s->vocab = llama_model_get_vocab(model);
     s->n_ctx = (int) llama_n_ctx(ctx);
-    LOGI("model loaded, context %d, %d threads", s->n_ctx, cp.n_threads);
+    LOGI("model loaded, context %d, %d threads, %s", s->n_ctx, cp.n_threads,
+         keep_in_ram ? "pinned in RAM" : "file-backed");
     return (jlong) (intptr_t) s;
 }
 
