@@ -39,6 +39,11 @@ function(build_variant name)
 endfunction()
 
 if (ANDROID_ABI STREQUAL "arm64-v8a")
+    # Three builds, not two. Above fp16 there are two instructions that decide the speed of a
+    # quantised model on a modern phone: the int8 dot product (asimddp) and the int8 matrix
+    # multiply (i8mm). Without them the kernels fall back to plain NEON, and a four-billion
+    # model answers at under one word a second. The loader picks by /proc/cpuinfo.
+    build_variant(whisper_v8_2_dp_i8mm -march=armv8.2-a+fp16+dotprod+i8mm)
     build_variant(whisper_v8fp16_va -march=armv8.2-a+fp16)
     build_variant(whisper -march=armv8-a)
 elseif (ANDROID_ABI STREQUAL "x86_64")
@@ -82,6 +87,7 @@ function(build_llama name)
 endfunction()
 
 if (ANDROID_ABI STREQUAL "arm64-v8a")
+    build_llama(llama_v8_2_dp_i8mm -march=armv8.2-a+fp16+dotprod+i8mm)
     build_llama(llama_v8fp16_va -march=armv8.2-a+fp16)
     build_llama(llama -march=armv8-a)
 elseif (ANDROID_ABI STREQUAL "x86_64")

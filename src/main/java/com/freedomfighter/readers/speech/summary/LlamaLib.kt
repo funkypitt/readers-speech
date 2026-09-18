@@ -1,7 +1,6 @@
 package com.freedomfighter.readers.speech.summary
 
-import android.os.Build
-import java.io.File
+import com.freedomfighter.readers.speech.share.Cpu
 import com.freedomfighter.readers.speech.whisper.preferredThreads
 
 /**
@@ -10,14 +9,7 @@ import com.freedomfighter.readers.speech.whisper.preferredThreads
  * a list of points, so there is no sampling setting to get wrong.
  */
 object LlamaLib {
-    init {
-        // Same rule as whisper: on arm64 a second copy compiled with fp16 arithmetic is much
-        // faster, and the loader falls back when the processor does not have it.
-        val fp16 = Build.SUPPORTED_ABIS.firstOrNull() == "arm64-v8a" &&
-            runCatching { File("/proc/cpuinfo").readText().contains("fphp") }.getOrDefault(false)
-        if (fp16) runCatching { System.loadLibrary("llama_v8fp16_va") }.onFailure { System.loadLibrary("llama") }
-        else System.loadLibrary("llama")
-    }
+    init { Cpu.load("llama") }
 
     @JvmStatic external fun initContext(modelPath: String, threads: Int, nCtx: Int): Long
     @JvmStatic external fun freeContext(ptr: Long)

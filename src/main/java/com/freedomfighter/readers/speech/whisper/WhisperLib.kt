@@ -1,15 +1,11 @@
 package com.freedomfighter.readers.speech.whisper
 
-import android.os.Build
+import com.freedomfighter.readers.speech.share.Cpu
 import java.io.File
 
 /** The JNI surface of the vendored whisper.cpp. One transcription at a time (the context is not thread-safe). */
 object WhisperLib {
-    init {
-        // On arm64 a second copy compiled with fp16 arithmetic is much faster; use it when the CPU has it.
-        val fp16 = Build.SUPPORTED_ABIS.firstOrNull() == "arm64-v8a" && runCatching { File("/proc/cpuinfo").readText().contains("fphp") }.getOrDefault(false)
-        if (fp16) runCatching { System.loadLibrary("whisper_v8fp16_va") }.onFailure { System.loadLibrary("whisper") } else System.loadLibrary("whisper")
-    }
+    init { Cpu.load("whisper") }
     @JvmStatic external fun initContext(modelPath: String): Long
     @JvmStatic external fun freeContext(ptr: Long)
     @JvmStatic external fun fullTranscribe(ptr: Long, threads: Int, language: String?, prompt: String?, audio: FloatArray): Int
