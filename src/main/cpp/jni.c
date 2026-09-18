@@ -119,6 +119,14 @@ Java_com_freedomfighter_readers_speech_whisper_WhisperLib_fullTranscribe(JNIEnv 
     atomic_store(&g_progress, 0);
     atomic_store(&g_abort, false);
     int rc = whisper_full(ctx, params, data, n);
+    // A detector that cannot be loaded must not cost the transcription: whichever way it failed,
+    // the piece is done again plainly rather than handed back empty.
+    if (rc != 0 && params.vad && !atomic_load(&g_abort)) {
+        LOGI("voice detection failed (%d); transcribing without it", rc);
+        params.vad = false;
+        atomic_store(&g_progress, 0);
+        rc = whisper_full(ctx, params, data, n);
+    }
     (*env)->ReleaseFloatArrayElements(env, audio, data, JNI_ABORT);
     if (lang) (*env)->ReleaseStringUTFChars(env, language, lang);
     if (hint) (*env)->ReleaseStringUTFChars(env, prompt, hint);
