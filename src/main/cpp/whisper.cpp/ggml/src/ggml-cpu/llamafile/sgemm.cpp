@@ -3809,11 +3809,18 @@ bool llamafile_sgemm(const struct ggml_compute_params * params, int64_t m, int64
     assert(m >= 0);
     assert(n >= 0);
     assert(k >= 0);
-    assert(lda >= k);
-    assert(ldb >= k);
-    assert(ldc >= m);
     assert(params->nth > 0);
     assert(params->ith < params->nth);
+
+    // Reader's patch. A matrix whose rows are shorter than k is not one this kernel can walk, and
+    // whisper's voice detector hands it exactly that: on Android, where the applications compile
+    // ggml with GGML_USE_LLAMAFILE, it aborted on the assertion in a debug build and would have
+    // read at the wrong stride in a release one. Refusing the request is what the contract already
+    // allows — both callers in ggml-cpu.c fall back to the generic multiplication — so the
+    // assertions become a refusal. Remove it when the vendored whisper.cpp is updated past the fix.
+    if (lda < k || ldb < k || ldc < m) {
+        return false;
+    }
 
     // only enable sgemm for prompt processing
 #if !defined(__MMA__)
