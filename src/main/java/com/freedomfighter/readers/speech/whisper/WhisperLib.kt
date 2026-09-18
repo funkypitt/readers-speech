@@ -8,7 +8,7 @@ object WhisperLib {
     init { Cpu.load("whisper") }
     @JvmStatic external fun initContext(modelPath: String): Long
     @JvmStatic external fun freeContext(ptr: Long)
-    @JvmStatic external fun fullTranscribe(ptr: Long, threads: Int, language: String?, prompt: String?, audio: FloatArray): Int
+    @JvmStatic external fun fullTranscribe(ptr: Long, threads: Int, language: String?, prompt: String?, vadModel: String?, vadPadMs: Int, audio: FloatArray): Int
     @JvmStatic external fun cancel()
     @JvmStatic external fun progress(): Int
     @JvmStatic external fun segmentCount(ptr: Long): Int
@@ -31,11 +31,11 @@ fun preferredThreads(): Int = runCatching {
 }.getOrDefault((Runtime.getRuntime().availableProcessors() - 2).coerceAtLeast(2))
 
 /** Run whisper over 16 kHz mono PCM; null when cancelled. */
-fun transcribe(modelPath: String, pcm16k: FloatArray, language: String?, prompt: String? = null): Pair<List<Segment>, String>? {
+fun transcribe(modelPath: String, pcm16k: FloatArray, language: String?, prompt: String? = null, vadModelPath: String? = null): Pair<List<Segment>, String>? {
     val ptr = WhisperLib.initContext(modelPath)
     require(ptr != 0L) { "cannot load $modelPath" }
     try {
-        val rc = WhisperLib.fullTranscribe(ptr, preferredThreads(), language, prompt, pcm16k)
+        val rc = WhisperLib.fullTranscribe(ptr, preferredThreads(), language, prompt, vadModelPath, Vad.PAD_MS, pcm16k)
         if (rc == 1) return null
         require(rc == 0) { "whisper failed" }
         val n = WhisperLib.segmentCount(ptr)
@@ -48,8 +48,10 @@ fun transcribe(modelPath: String, pcm16k: FloatArray, language: String?, prompt:
 /**
  * A model loaded once and used for every piece of a long recording. One piece at a time. The
  * path may be `/proc/self/fd/N` when the model belongs to the sibling app (see ModelFiles).
+ *
+ * With [vadModelPath] the silence is never decoded: see [Vad] for what that is worth.
  */
-class WhisperSession(modelPath: String) : AutoCloseable {
+class WhisperSession(modelPath: String, private val vadModelPath: String? = null) : AutoCloseable {
     private val ptr = WhisperLib.initContext(modelPath).also { require(it != 0L) { "cannot load $modelPath" } }
 
     /** Segments with times inside the piece; null when cancelled. [onProgress] gets 0–100 while it runs. */
@@ -62,7 +64,7 @@ class WhisperSession(modelPath: String) : AutoCloseable {
             }
         }.apply { isDaemon = true; start() }
         try {
-            val rc = WhisperLib.fullTranscribe(ptr, preferredThreads(), language, prompt, pcm16k)
+            val rc = WhisperLib.fullTranscribe(ptr, preferredThreads(), language, prompt, vadModelPath, Vad.PAD_MS, pcm16k)
             if (rc == 1) return null
             require(rc == 0) { "whisper failed" }
             val n = WhisperLib.segmentCount(ptr)
