@@ -43,11 +43,20 @@ object Translator {
         LlamaSession(modelPath, keepInRam = keepInRam).use { session ->
             if (!session.loaded) throw IllegalStateException(session.why().ifBlank { "llama: model not loaded" })
             val out = ArrayList<Block>(blocks.size)
+            // Within the block as well as from block to block. A talk has forty blocks and the
+            // difference hardly shows; a short has three, and a figure that sat at 0 for minutes
+            // was taken — rightly — for something jammed.
+            var shown = 0
+            fun report(block: Int, insideBlock: Int) {
+                val p = (block * 100 + insideBlock.coerceIn(0, 99)) / blocks.size
+                // Never backwards: a second attempt at a block starts its own count again.
+                if (p > shown) { shown = p; onProgress(p) }
+            }
             blocks.forEachIndexed { i, block ->
                 if (cancelled()) return null
-                onProgress(i * 100 / blocks.size)
-                val done = once(session, block.text, target)
-                    ?: once(session, block.text, target, strict = true)
+                report(i, 0)
+                val done = once(session, block.text, target) { report(i, it) }
+                    ?: once(session, block.text, target, strict = true) { report(i, it) }
                 out.add(block.copy(text = (done ?: block.text).trim()))
             }
             onProgress(100)
@@ -56,9 +65,15 @@ object Translator {
     }
 
     /** One passage. Returns null when the answer is missing, empty, or plainly not a translation. */
-    private fun once(session: LlamaSession, text: String, target: String, strict: Boolean = false): String? {
+    private fun once(
+        session: LlamaSession,
+        text: String,
+        target: String,
+        strict: Boolean = false,
+        onProgress: (Int) -> Unit = {},
+    ): String? {
         val template = (if (strict) STRICT else ASK)[target] ?: (if (strict) STRICT else ASK)["en"]!!
-        val answer = session.run(template.format(text), MAX_TOKENS)?.trim()
+        val answer = session.run(template.format(text), MAX_TOKENS, onProgress)?.trim()
         if (answer.isNullOrBlank()) {
             Log.w(TAG, "empty answer: " + session.why())
             return null
