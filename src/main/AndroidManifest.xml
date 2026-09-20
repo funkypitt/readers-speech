@@ -5,6 +5,7 @@
         <package android:name="com.freedomfighter.readersaudio" />
         <package android:name="com.freedomfighter.readersrecorder" />
         <package android:name="com.freedomfighter.readerspodcasts" />
+        <package android:name="com.freedomfighter.readersnotes" />
     </queries>
     <application>
         <!-- Exported, but the provider itself refuses any caller not signed with our key: a
