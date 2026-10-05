@@ -31,6 +31,7 @@ object ModelFiles {
         "com.freedomfighter.readersrecorder",
         "com.freedomfighter.readerspodcasts",
         "com.freedomfighter.readersnotes",
+        "com.freedomfighter.readersphone",
     )
 
     fun dir(ctx: Context): File = File(ctx.filesDir, "models").apply { mkdirs() }
