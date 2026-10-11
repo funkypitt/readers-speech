@@ -1,0 +1,151 @@
+
+==== question puis réponse, manquée par 1, vue par 2 : 39 cas
+
+--- ligne 25 — question puis réponse, manquée par 1, vue par 2
+    23 v0 +   0 ms                              if they take everything to heart that you're about to teach us?
+    24 v0 + 140 ms [2]                          What are we going to learn?
+¶   25 v1 + 680 ms [2][4b]                      Well, I think we're going to learn quite a bit.
+    26 v1 + 300 ms                              I think that these are topics that aren't really discussed a lot.
+
+--- ligne 42 — question puis réponse, manquée par 1, vue par 2
+    40 v0 + 140 ms                              who got this episode sent to them by somebody who cares deeply about them,
+    41 v0 + 320 ms                              what do you want him to know about what we're going to talk about today?
+¶   42 v1 + 440 ms [2][3][4b]                   Well, you're going to learn everything you wanted to know about hormonal health,
+    43 v1 + 340 ms                              sexual health, reproductive health.
+
+--- ligne 58 — question puis réponse, manquée par 1, vue par 2
+    56 v0 + 360 ms [2]                          And what do you want us to know about it when you think about the bigger picture
+    57 v0 +   0 ms                              before we dive into specific questions?
+¶   58 v1 + 680 ms [2][3][4b]                   Yeah, so I think it's just sort of optimum hormone levels.
+    59 v1 +   0 ms                              And I think when we think about men, the main one we talk about is testosterone.
+
+==== changement de voix sans ?, manqué par 2, vu par 3 ou 4 : 100 cas
+
+--- ligne 1 — changement de voix sans ?, manqué par 2, vu par 3 ou 4
+¶    0 v0 +   0 ms [1][2][3][4b]                Today on the Mel Robbins podcast, the ultimate guide to men's health.
+¶    1 v1 + 520 ms [3][4b]                      There's been lots of studies that show that sperm counts are going down globally.
+     2 v1 + 480 ms                              Over 50, about half of men have a load testosterone.
+
+--- ligne 3 — changement de voix sans ?, manqué par 2, vu par 3 ou 4
+¶    1 v1 + 520 ms [3][4b]                      There's been lots of studies that show that sperm counts are going down globally.
+     2 v1 + 480 ms                              Over 50, about half of men have a load testosterone.
+¶    3 v0 + 540 ms [3][4b]                      With the head of Stanford's male reproductive medicine and surgery program, Dr. Michael Isenberg.
+¶    4 v1 + 380 ms [3][4b]                      Formal health, reproductive health. A lot of men are not comfortable talking about this.
+
+--- ligne 4 — changement de voix sans ?, manqué par 2, vu par 3 ou 4
+     2 v1 + 480 ms                              Over 50, about half of men have a load testosterone.
+¶    3 v0 + 540 ms [3][4b]                      With the head of Stanford's male reproductive medicine and surgery program, Dr. Michael Isenberg.
+¶    4 v1 + 380 ms [3][4b]                      Formal health, reproductive health. A lot of men are not comfortable talking about this.
+     5 v1 + 240 ms                              There's this feeling of shame a little bit and guilt,
+
+--- ligne 7 — changement de voix sans ?, manqué par 2, vu par 3 ou 4
+     5 v1 + 240 ms                              There's this feeling of shame a little bit and guilt,
+     6 v1 + 360 ms                              concerns about their own masculinity.
+¶    7 v0 +   0 ms [3][4b]                      We are talking about my husband's private. He's going to kill me.
+¶    8 v0 +1960 ms [1][2][3][4b]                Whatever.
+
+==== changement de voix manqué par tous : 10 cas
+
+--- ligne 622 — changement de voix manqué par tous
+¶  620 v1 + 380 ms [2][4b]                      That's thought to be the mechanism. You know, originally these medications were to
+   621 v1 +   0 ms [3]                          design as a treatment for blood pressure or treatment for angina or chest pain.
+¶  622 v0 + 220 ms                              Oh.
+¶  623 v1 + 220 ms                              They didn't work that well at that, but they, this was kind of an unexpected but very profitable
+
+--- ligne 623 — changement de voix manqué par tous
+   621 v1 +   0 ms [3]                          design as a treatment for blood pressure or treatment for angina or chest pain.
+¶  622 v0 + 220 ms                              Oh.
+¶  623 v1 + 220 ms                              They didn't work that well at that, but they, this was kind of an unexpected but very profitable
+¶  624 v0 +   0 ms [4b]                         side effect.
+
+--- ligne 641 — changement de voix manqué par tous
+   639 v0 + 440 ms                              what do you recommend?
+¶  640 v1 + 660 ms [2][3][4b]                   Well, if they've never been on any of these and we can't correct anything further than they
+¶  641 v0 +   0 ms                              already have, but I think
+¶  642 v1 +   0 ms                              I usually start with one of these medications.
+
+--- ligne 642 — changement de voix manqué par tous
+¶  640 v1 + 660 ms [2][3][4b]                   Well, if they've never been on any of these and we can't correct anything further than they
+¶  641 v0 +   0 ms                              already have, but I think
+¶  642 v1 +   0 ms                              I usually start with one of these medications.
+   643 v1 + 320 ms                              Gotcha.
+
+==== faux positifs de 1. pauses seules (règle bureau) : 13
+
+--- ligne 38 — faux positif de 1
+    36 v1 +  80 ms                              And I think people also need to understand that there is a lot that they can do.
+    37 v1 + 100 ms                              They have a lot of agency with a lot of these things.
+    38 v1 + 620 ms [1]                          And it starts with education, which I think is one of the great things about this podcast.
+¶   39 v0 + 480 ms [3][4b]                      Dr. Eisberg, for the man who is listening right now,
+
+--- ligne 54 — faux positif de 1
+    52 v0 + 280 ms                              And maybe I'm going to sound like a giant dummy, but it's not until I hit perimenopause
+    53 v0 + 580 ms                              and now I'm fully in menopause that I even started to think about male hormone health.
+    54 v0 + 400 ms [1]                          And I'd love for you, Dr. Eisberg, to start by just setting the table for us.
+    55 v0 + 580 ms                              What is male hormone health?
+
+--- ligne 98 — faux positif de 1
+    96 v1 +   0 ms                              are again, these sort of low energy level, those are typically the things, sexual dysfunction,
+    97 v1 + 240 ms                              erectile dysfunction, those are things that we want to think. Does this guy have low testosterone?
+    98 v1 + 480 ms [1][2][4b]                   Let's check it.
+¶   99 v0 + 340 ms [3][4b]                      Well, I'm thinking about it from the partner standpoint, because as
+
+==== faux positifs de 2. pauses + indices textuels (q≥0, marqueur≥500) : 15
+
+--- ligne 24 — faux positif de 2
+    22 v0 +   0 ms                              in general. What could possibly change about their life or the life of a guy that they love
+    23 v0 +   0 ms                              if they take everything to heart that you're about to teach us?
+    24 v0 + 140 ms [2]                          What are we going to learn?
+¶   25 v1 + 680 ms [2][4b]                      Well, I think we're going to learn quite a bit.
+
+--- ligne 56 — faux positif de 2
+    54 v0 + 400 ms [1]                          And I'd love for you, Dr. Eisberg, to start by just setting the table for us.
+    55 v0 + 580 ms                              What is male hormone health?
+    56 v0 + 360 ms [2]                          And what do you want us to know about it when you think about the bigger picture
+    57 v0 +   0 ms                              before we dive into specific questions?
+
+--- ligne 67 — faux positif de 2
+    65 v1 + 339 ms                              And it's so important, we're obviously going to talk about all the things that it does,
+    66 v1 + 240 ms                              quality of life things, overall health things, functional things.
+    67 v1 + 720 ms [2]                          So I think that having that understanding, I think is really fundamental.
+¶   68 v0 + 360 ms [1][3][4b]                   Okay. What age do men start to see changes in testosterone?
+
+==== faux positifs de 3. pauses + F0 seul (seuil 1.30, pause≥0) : 23
+
+--- ligne 9 — faux positif de 3
+¶    7 v0 +   0 ms [3][4b]                      We are talking about my husband's private. He's going to kill me.
+¶    8 v0 +1960 ms [1][2][3][4b]                Whatever.
+     9 v0 + 820 ms [3]                          This is the ultimate guide to male hormones and men's health.
+¶   10 v1 + 440 ms [3][4b]                      This is a very important topic and something that a lot
+
+--- ligne 27 — faux positif de 3
+¶   25 v1 + 680 ms [2][4b]                      Well, I think we're going to learn quite a bit.
+    26 v1 + 300 ms                              I think that these are topics that aren't really discussed a lot.
+    27 v1 + 100 ms [3]                          I think people don't understand them a lot.
+    28 v1 + 120 ms                              I think there's a lot of embarrassment about them.
+
+--- ligne 86 — faux positif de 3
+    84 v1 +   0 ms                              So it's not usually kind of a steep drop off, but it does slowly go down in it.
+    85 v1 +  80 ms                              There's different factors, age is one, but also our metabolic health,
+    86 v1 + 740 ms [3]                          adiposity, like how much weight we have, all these things will impact it.
+¶   87 v0 + 160 ms [3][4b]                      What are the signs or symptoms that you may have low testosterone?
+
+==== faux positifs de 4b. pauses + segmentation locale PyanNet (changement > 0.3, pause≥0) : 19
+
+--- ligne 98 — faux positif de 4b
+    96 v1 +   0 ms                              are again, these sort of low energy level, those are typically the things, sexual dysfunction,
+    97 v1 + 240 ms                              erectile dysfunction, those are things that we want to think. Does this guy have low testosterone?
+    98 v1 + 480 ms [1][2][4b]                   Let's check it.
+¶   99 v0 + 340 ms [3][4b]                      Well, I'm thinking about it from the partner standpoint, because as
+
+--- ligne 101 — faux positif de 4b
+¶   99 v0 + 340 ms [3][4b]                      Well, I'm thinking about it from the partner standpoint, because as
+   100 v0 +   0 ms                              you're listing those things off, I was kind of going like, okay, check, check, at least not right
+   101 v0 +   0 ms [4b]                         now, but certainly about five years ago, Chris is very open about the fact that he was struggling
+   102 v0 +   0 ms                              with depression and just was not himself, like very low energy, very shut down, very low sex
+
+--- ligne 241 — faux positif de 4b
+   239 v1 +  60 ms                              I think that's really going to be crucial. Anything that's good for your heart is good for
+¶  240 v0 +   0 ms [3][4b]                      testosterone. That makes a lot of sense. How does chronic stress, a lot of people,
+   241 v0 + 560 ms [4b]                         the number one word that we're seeing right now, Dr. Eisenberg from our audience,
+   242 v0 + 120 ms                              globally is exhausted. And I'd love to know how does chronic stress impact testosterone levels?

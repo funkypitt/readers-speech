@@ -1,0 +1,146 @@
+
+==== question puis réponse, manquée par 1, vue par 2 : 5 cas
+
+--- ligne 4 — question puis réponse, manquée par 1, vue par 2
+     2 v0 +   0 ms [3]                          Thank you for having me.
+     3 v0 + 480 ms [3]                          So again, in Switzerland, I think everyone knows who you are. Who is Roger Koppel?
+¶    4 v1 +   0 ms [2]                          Well, I'm an unconventional Swiss. I'm a journalist. My father was an entrepreneur in the construction business.
+     5 v1 + 440 ms                              So I somehow got a bit derailed biographically.
+
+--- ligne 110 — question puis réponse, manquée par 1, vue par 2
+   108 v0 +   0 ms                              if everything is good and evil, though.
+   109 v0 +   0 ms                              How do you see this, I guess, narrative trap of the Iran war and the Ukraine war?
+¶  110 v1 + 720 ms [2][3]                       It's the inability to differentiate also.
+   111 v1 + 220 ms                              I mean, this behavior, if you're arguing always in terms of on which side are you on,
+
+--- ligne 307 — question puis réponse, manquée par 1, vue par 2
+   305 v0 + 480 ms                              They're not that interested in Europe anymore, they have to make priorities.
+   306 v0 + 260 ms                              We're not that important, so what do we do?
+¶  307 v1 + 340 ms [2]                          We'll never underestimate the American interest in Europe.
+   308 v1 +   0 ms                              I mean, they have fought for this continent as well in the Second World War, and the Russians too, and they both got separated in Berlin.
+
+==== changement de voix sans ?, manqué par 2, vu par 3 ou 4 : 5 cas
+
+--- ligne 65 — changement de voix sans ?, manqué par 2, vu par 3 ou 4
+¶   63 v0 +1020 ms [1][2][3][4b]                It's very strange the concepts we come up with and it helps to dumb it down.
+    64 v0 + 120 ms                              It seems a discourse because we
+¶   65 v1 +   0 ms [4b]                         just talk who is pro this or anti that.
+    66 v1 +   0 ms                              It's totally absurd.
+
+--- ligne 215 — changement de voix sans ?, manqué par 2, vu par 3 ou 4
+¶  213 v1 + 340 ms [1][2][3][4b]                There are tough interests at play, which is true, of course.
+   214 v1 +   0 ms                              But I would always say there is always room for compromise and never underestimate the role of misunderstandings, of profound misunderstandings, which can be sorted out as soon as we start to discuss with each other.
+¶  215 v0 + 760 ms [4b]                         Actually, so a comment made just now by Marco Rubio, he was arguing that, well, we have gotten a deal over Greenland, which will be in perpetuity.
+   216 v0 + 220 ms                              And he said, never again will any of America's adversaries be allowed to have any economic activity in Greenland.
+
+--- ligne 229 — changement de voix sans ?, manqué par 2, vu par 3 ou 4
+   227 v0 + 720 ms                              How do you see the misunderstanding each other?
+   228 v0 + 220 ms [2]                          Because now everyone has some flaws to them, I think.
+¶  229 v1 + 240 ms [4b]                         I try to look at these issues, not so much, for example, in terms of values and all those words.
+   230 v1 + 240 ms                              We hear a lot also in the news.
+
+--- ligne 355 — changement de voix sans ?, manqué par 2, vu par 3 ou 4
+   353 v0 + 160 ms                              Because often it's seen as free riding.
+   354 v0 + 160 ms                              Which it was, the lesbianism.
+¶  355 v1 + 860 ms [3]                          Free riding.
+¶  356 v0 +   0 ms                              Of course.
+
+==== changement de voix manqué par tous : 3 cas
+
+--- ligne 171 — changement de voix manqué par tous
+   169 v0 + 560 ms                              And again, so is this authentic to the core?
+   170 v0 + 360 ms [2]                          Or I'm not sure if they're manipulating
+¶  171 v1 +   0 ms                              or if they're genuine.
+   172 v1 + 400 ms                              I think this is just, I mean, I would say I don't tend to attach bad motives to actions I don't like.
+
+--- ligne 356 — changement de voix manqué par tous
+   354 v0 + 160 ms                              Which it was, the lesbianism.
+¶  355 v1 + 860 ms [3]                          Free riding.
+¶  356 v0 +   0 ms                              Of course.
+   357 v0 + 360 ms                              But as you said, it was also a prid pro quo, I think.
+
+--- ligne 458 — changement de voix manqué par tous
+   456 v0 + 180 ms                              That's what we most associate with Swiss as well as secret bank accounts and great chocolates.
+   457 v0 + 260 ms                              But let's focus on the neutrality.
+¶  458 v1 + 160 ms                              We have also a great industry, very innovative universities.
+   459 v1 + 560 ms                              There are a lot of things we can offer.
+
+==== faux positifs de 1. pauses seules (règle bureau) : 11
+
+--- ligne 34 — faux positif de 1
+    32 v1 +   0 ms                              I made the observation in all the fields.
+    33 v1 + 160 ms                              Actually, I've worked in sports.
+    34 v1 + 780 ms [1][4b]                      I was a film critic during my university years and even there it was clear these are the good directors.
+    35 v1 + 800 ms                              You have to find them the greatest and everybody who has a different view probably likes Hollywood movies.
+
+--- ligne 46 — faux positif de 1
+¶   44 v1 + 400 ms [2]                          Always challenge the mainstream, challenge the so-called majorities in order to present a broader view of things
+    45 v1 +   0 ms                              so that the people can build a better picture of reality.
+    46 v1 + 400 ms [1][3]                       And in democracies, of course, they have to decide.
+    47 v1 + 220 ms                              They have to decide on issues and it's important you see all sides of it on just one side.
+
+--- ligne 118 — faux positif de 1
+   116 v1 + 880 ms                              They're above the shoulders.
+   117 v1 + 240 ms                              I mean, they're actually warring parties.
+   118 v1 + 440 ms [1][4b]                      I mean, this is the way warring parties speak.
+   119 v1 + 160 ms                              I mean, if I'm in war with my country, Switzerland, with another country, of course,
+
+==== faux positifs de 2. pauses + indices textuels (q≥0, marqueur≥500) : 55
+
+--- ligne 29 — faux positif de 2
+    27 v0 +   0 ms                              This is how it should be, I guess.
+    28 v0 + 420 ms                              But how do you see the climate of media independence?
+    29 v0 + 380 ms [2]                          Because it is strange that you have to fall in line, it seems.
+¶   30 v1 + 580 ms [2][3]                       Yeah, it's a strange mechanism of, you could call it self-conformism.
+
+--- ligne 54 — faux positif de 2
+    52 v0 + 140 ms                              oh, we have to work with the United States.
+    53 v0 + 300 ms                              You have to be pro-American, but what does pro-American mean?
+    54 v0 + 400 ms [2]                          They saw one concept and they filled it up with whatever they want.
+    55 v0 + 180 ms                              So that means you for them try to preserve a global empire.
+
+--- ligne 73 — faux positif de 2
+    71 v1 +  60 ms                              I mean, it's amazing.
+    72 v1 + 560 ms                              What is the phenomenon behind it?
+    73 v1 + 100 ms [2]                          I would say it's the inability to discuss properly and matter of factly.
+    74 v1 +   0 ms                              It's like, I call it the disease of moralism.
+
+==== faux positifs de 3. pauses + F0 seul (seuil 1.30, pause≥0) : 64
+
+--- ligne 2 — faux positif de 3
+¶    0 v0 +   0 ms [1][2][3][4b]                Welcome everyone. Today we're joined by Roger Koppel, a Swiss journalist, a former politician and editor-in-chief of the Weltwoche publication I myself have written in.
+     1 v0 + 300 ms                              So an excellent one as well. So thank you very much for coming here.
+     2 v0 +   0 ms [3]                          Thank you for having me.
+     3 v0 + 480 ms [3]                          So again, in Switzerland, I think everyone knows who you are. Who is Roger Koppel?
+
+--- ligne 3 — faux positif de 3
+     1 v0 + 300 ms                              So an excellent one as well. So thank you very much for coming here.
+     2 v0 +   0 ms [3]                          Thank you for having me.
+     3 v0 + 480 ms [3]                          So again, in Switzerland, I think everyone knows who you are. Who is Roger Koppel?
+¶    4 v1 +   0 ms [2]                          Well, I'm an unconventional Swiss. I'm a journalist. My father was an entrepreneur in the construction business.
+
+--- ligne 39 — faux positif de 3
+    37 v1 +   0 ms                              This has become extremely almost totalitarian.
+    38 v1 + 440 ms                              I think that the free discourse, the dialectical discussion of different views, different arguments
+    39 v1 +   0 ms [3]                          to analyze a problem, to view it from different sides.
+    40 v1 +  60 ms                              I mean, this is the essence of democracy. This is our strength.
+
+==== faux positifs de 4b. pauses + segmentation locale PyanNet (changement > 0.3, pause≥0) : 11
+
+--- ligne 34 — faux positif de 4b
+    32 v1 +   0 ms                              I made the observation in all the fields.
+    33 v1 + 160 ms                              Actually, I've worked in sports.
+    34 v1 + 780 ms [1][4b]                      I was a film critic during my university years and even there it was clear these are the good directors.
+    35 v1 + 800 ms                              You have to find them the greatest and everybody who has a different view probably likes Hollywood movies.
+
+--- ligne 43 — faux positif de 4b
+    41 v1 +   0 ms [3]                          But now we have turned ourselves into some kind of amputated, one-sided, lopsided democracy,
+    42 v1 + 700 ms                              which is probably not a democracy after all.
+    43 v1 +  60 ms [4b]                         So I would say that it's very important that that's the prime duty of journalists to challenge the mainstream.
+¶   44 v1 + 400 ms [2]                          Always challenge the mainstream, challenge the so-called majorities in order to present a broader view of things
+
+--- ligne 118 — faux positif de 4b
+   116 v1 + 880 ms                              They're above the shoulders.
+   117 v1 + 240 ms                              I mean, they're actually warring parties.
+   118 v1 + 440 ms [1][4b]                      I mean, this is the way warring parties speak.
+   119 v1 + 160 ms                              I mean, if I'm in war with my country, Switzerland, with another country, of course,
