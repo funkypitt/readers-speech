@@ -42,40 +42,58 @@ object Prompts {
 }
 
 /**
- * Paragraphs from timed segments. A break only where a sentence has ended: after a pause of
- * 1.2 s once the paragraph has some body, or as soon as it passes about 600 characters. A
- * runaway sentence is cut at about 1,200 characters all the same.
+ * Paragraphs from timed segments, the same rule as the desktop apps so that a transcript reads
+ * the same wherever it was made: a new paragraph where another voice starts (a question, then
+ * its answer), after a pause of two seconds, after a shorter pause (0.9 s) once a sentence has
+ * ended, and, one voice going on, at the end of a sentence once the paragraph has grown past
+ * about 900 characters. A runaway sentence is cut at about 1,200 characters all the same.
  */
 object Paragraphs {
-    private const val PAUSE_MS = 1_200L
+    const val LONG_PAUSE_MS = 2_000L
+    const val SENTENCE_PAUSE_MS = 900L
+    const val LONG_PARAGRAPH = 900
+    const val BREATH_MS = 250L
+    private const val RUNAWAY = 1_200
+
+    /** For each segment, whether a paragraph begins with it (the first always does). */
+    fun starts(segments: List<Segment>): BooleanArray {
+        val out = BooleanArray(segments.size)
+        var lastEnd = -1L
+        var length = 0
+        var ended = false
+        segments.forEachIndexed { i, s ->
+            val gap = if (lastEnd < 0) 0L else s.startMs - lastEnd
+            val start = i == 0 || s.newVoice || gap >= LONG_PAUSE_MS || (ended && gap >= SENTENCE_PAUSE_MS) ||
+                (ended && length >= LONG_PARAGRAPH && gap >= BREATH_MS) || length >= RUNAWAY
+            out[i] = start
+            val text = s.text.trim()
+            length = if (start) text.length else length + 1 + text.length
+            if (text.isNotEmpty()) ended = endsSentence(text)
+            lastEnd = s.endMs
+        }
+        return out
+    }
 
     fun build(segments: List<Segment>, noSpeech: String): String {
+        // whisper, once it repeats a sentence, may repeat it for minutes: once is enough
+        var previous = ""
+        val kept = segments.filter { s ->
+            val key = s.text.trim().lowercase().replace(Regex("[^\\p{L}\\p{N}]+"), " ").trim()
+            (key.isNotEmpty() && key != previous).also { if (it) previous = key }
+        }
+        val starts = starts(kept)
         val out = ArrayList<String>()
         val cur = StringBuilder()
-        var lastEnd = -1L
-        var previous = ""
-        for (s in segments) {
-            val text = s.text.trim()
-            if (text.isEmpty()) continue
-            // whisper, once it repeats a sentence, may repeat it for minutes: once is enough
-            val key = text.lowercase().replace(Regex("[^\\p{L}\\p{N}]+"), " ").trim()
-            if (key == previous) continue
-            previous = key
-            val gap = if (lastEnd < 0) 0L else s.startMs - lastEnd
-            val len = cur.length
-            val ended = len > 0 && endsSentence(cur)
-            if (len > 0 && ((ended && gap >= PAUSE_MS && len >= 250) || (ended && len >= 600) || len >= 1_200)) {
-                out.add(cur.toString().trim()); cur.setLength(0)
-            }
+        kept.forEachIndexed { i, s ->
+            if (starts[i] && cur.isNotEmpty()) { out.add(cur.toString().trim()); cur.setLength(0) }
             if (cur.isNotEmpty()) cur.append(' ')
-            cur.append(text)
-            lastEnd = s.endMs
+            cur.append(s.text.trim())
         }
         if (cur.isNotEmpty()) out.add(cur.toString().trim())
         return if (out.isEmpty()) noSpeech + "\n" else out.joinToString("\n\n") + "\n"
     }
 
-    private fun endsSentence(s: CharSequence): Boolean {
+    fun endsSentence(s: CharSequence): Boolean {
         var i = s.length - 1
         while (i >= 0 && (s[i].isWhitespace() || s[i] in "\"'»”’)")) i--
         return i >= 0 && s[i] in ".!?…"

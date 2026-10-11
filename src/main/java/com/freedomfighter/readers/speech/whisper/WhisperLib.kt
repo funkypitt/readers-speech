@@ -19,7 +19,8 @@ object WhisperLib {
     @JvmStatic external fun systemInfo(): String
 }
 
-data class Segment(val startMs: Long, val endMs: Long, val text: String)
+/** One line whisper heard; `newVoice` when another person starts speaking here (see [Voices]). */
+data class Segment(val startMs: Long, val endMs: Long, val text: String, val newVoice: Boolean = false)
 
 /** Threads: the big cores only, at least two. */
 fun preferredThreads(): Int = runCatching {
@@ -49,9 +50,11 @@ fun transcribe(modelPath: String, pcm16k: FloatArray, language: String?, prompt:
  * A model loaded once and used for every piece of a long recording. One piece at a time. The
  * path may be `/proc/self/fd/N` when the model belongs to the sibling app (see ModelFiles).
  *
- * With [vadModelPath] the silence is never decoded: see [Vad] for what that is worth.
+ * With [vadModelPath] the silence is never decoded: see [Vad] for what that is worth. With
+ * [voices], each line is marked when another person starts speaking, while the piece of sound
+ * is still at hand: see [Voices].
  */
-class WhisperSession(modelPath: String, private val vadModelPath: String? = null) : AutoCloseable {
+class WhisperSession(modelPath: String, private val vadModelPath: String? = null, private val voices: Voices? = null) : AutoCloseable {
     private val ptr = WhisperLib.initContext(modelPath).also { require(it != 0L) { "cannot load $modelPath" } }
 
     /** Segments with times inside the piece; null when cancelled. [onProgress] gets 0–100 while it runs. */
@@ -68,7 +71,8 @@ class WhisperSession(modelPath: String, private val vadModelPath: String? = null
             if (rc == 1) return null
             require(rc == 0) { "whisper failed" }
             val n = WhisperLib.segmentCount(ptr)
-            return (0 until n).map { Segment(WhisperLib.segmentT0(ptr, it) * 10, WhisperLib.segmentT1(ptr, it) * 10, WhisperLib.segmentText(ptr, it).trim()) }
+            val segs = (0 until n).map { Segment(WhisperLib.segmentT0(ptr, it) * 10, WhisperLib.segmentT1(ptr, it) * 10, WhisperLib.segmentText(ptr, it).trim()) }
+            return voices?.let { v -> runCatching { v.mark(pcm16k, segs) }.getOrDefault(segs) } ?: segs
         } finally { done.set(true); poll.interrupt() }
     }
 

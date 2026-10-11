@@ -8,8 +8,11 @@ Moved out of the README: what the module holds, and what was measured.
   CPU flavour (arm64 baseline and arm64 with fp16 arithmetic; x86_64 for the emulator), plus the two
   JNI bridges `jni.c` and `llama_jni.c`.
 - `whisper/` — `WhisperLib`, `WhisperSession`, the two model qualities (`Models`), the punctuation
-  prompts and the paragraph rule (`Prompts`, `Paragraphs`), and `Vad`, the Silero voice detector
-  carried in the assets so that silence is never decoded.
+  prompts and the paragraph rule (`Prompts`, `Paragraphs`), `Vad`, the Silero voice detector
+  carried in the assets so that silence is never decoded, and `Voices`, pyannote's segmentation
+  model (ONNX, in the assets) that marks the lines where another person starts speaking, so
+  that `Paragraphs` cuts there. `Segment.newVoice` carries the mark; a `WhisperSession` given a
+  `Voices` sets it while the piece of sound is still in memory (gaps between two pieces are blind).
 - `translate/` — `Translator` and `TranslateModel`: a transcript rendered into another language on
   the phone, in blocks that keep their place in the sound.
 - `audio/` — MediaCodec decoding in pieces and the resampler to 16 kHz.
