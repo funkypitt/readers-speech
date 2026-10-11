@@ -1,33 +1,45 @@
 package com.freedomfighter.readers.speech.whisper
 
-import ai.onnxruntime.OnnxTensor
-import ai.onnxruntime.OrtEnvironment
-import ai.onnxruntime.OrtSession
 import android.content.Context
-import java.nio.FloatBuffer
+import com.freedomfighter.readers.speech.share.Cpu
 import kotlin.math.max
 import kotlin.math.min
+
+/** The JNI surface of pyannet.c, the segmentation network written in C (in the whisper library). */
+object VoicesLib {
+    init { Cpu.load("whisper") }
+    /** The model from the bytes of the .bin asset; 0 when they are not it. */
+    @JvmStatic external fun initModel(bytes: ByteArray): Long
+    @JvmStatic external fun freeModel(ptr: Long)
+    /** The network over pcm[offset, offset + n): frames × 7 log-probabilities, flat; null when it failed. */
+    @JvmStatic external fun run(ptr: Long, pcm: FloatArray, offset: Int, n: Int): FloatArray?
+}
+
+/** What runs the network: over `pcm[offset, offset + n)`, the frames × 7 log-probabilities, flat. */
+typealias FrameRunner = (pcm: FloatArray, offset: Int, n: Int) -> FloatArray
 
 /**
  * Tells, line by line, where another person starts speaking — so that a question and its
  * answer become two paragraphs — without the full speaker diarization a phone cannot afford.
  *
  * The model is pyannote's segmentation network alone (`pyannote/segmentation-3.0`, 1.5 million
- * parameters, six megabytes, MIT, carried in the assets as sherpa-onnx exports it): given ten
- * seconds of sound it says, every 17 ms, which of up to three local speakers are talking. It is
- * run once per gap between two lines of whisper, on a window starting five seconds before the
- * gap, and the speaker who dominates the two seconds before is compared with the one who
- * dominates the two seconds after; a different one marks the line. Local is enough: the
- * paragraphs need a change, not an identity.
+ * parameters, six megabytes, MIT), carried in the assets as plain weights and run by a C
+ * implementation of the network in this module (`src/main/cpp/pyannet.c`), with no inference
+ * engine: given ten seconds of sound it says, every 17 ms, which of up to three local speakers
+ * are talking. It is run once per gap between two lines of whisper, on a window starting five
+ * seconds before the gap, and the speaker who dominates the two seconds before is compared with
+ * the one who dominates the two seconds after; a different one marks the line. Local is enough:
+ * the paragraphs need a change, not an identity.
  *
  * Only the gaps where a paragraph may begin are looked at — the previous line ends a sentence,
  * or there is a pause of 200 ms — which halves the work. Measured on 2026-10-11 (study in
  * docs/etudes/paragraphes-2026-10-11, reproduced bit for bit by this engine): against pauses
  * alone, the changes of voice found on an interview go from a quarter to four fifths, for about
- * 0.4 % of the sound's duration of CPU on a desktop core — a minute or two per hour on a phone.
+ * 50 ms of one desktop core per window — a minute or two per hour on a phone.
+ *
+ * The [runner] is the network; the real one is [VoicesLib], the tests hand in recorded frames.
  */
-class Voices private constructor(private val env: OrtEnvironment, private val session: OrtSession) : AutoCloseable {
-    private val inputName = session.inputNames.first()
+class Voices(private val runner: FrameRunner, private val release: () -> Unit = {}) : AutoCloseable {
 
     /** The lines with `newVoice` set where another person starts; the sound is the piece the lines belong to. */
     fun mark(pcm16k: FloatArray, segments: List<Segment>): List<Segment> {
@@ -54,6 +66,7 @@ class Voices private constructor(private val env: OrtEnvironment, private val se
         if (b - a < SAMPLE_RATE) return null
         val active = run(pcm16k, a, b)                       // per frame, which local speakers talk
         val frames = active.size
+        if (frames == 0) return null
         fun frame(sample: Int) = ((sample - a).toLong() * frames / (b - a)).toInt()
         val before = dominant(active, frame(max(a, gap - MARGIN)), frame(gap)) ?: return null
         val after = dominant(active, frame(gap), min(frames, frame(gap + MARGIN))) ?: return null
@@ -62,18 +75,12 @@ class Voices private constructor(private val env: OrtEnvironment, private val se
 
     /** The model over the samples [a, b), as the set of speakers active in each frame (the likeliest class). */
     private fun run(pcm16k: FloatArray, a: Int, b: Int): Array<BooleanArray> {
-        val n = b - a
-        val buffer = FloatBuffer.wrap(pcm16k, a, n).slice()
-        OnnxTensor.createTensor(env, buffer, longArrayOf(1, 1, n.toLong())).use { tensor ->
-            session.run(mapOf(inputName to tensor)).use { result ->
-                @Suppress("UNCHECKED_CAST")
-                val y = (result[0].value as Array<Array<FloatArray>>)[0]    // [frames][7 classes], log-probabilities
-                return Array(y.size) { f ->
-                    val row = y[f]
-                    val best = row.indices.maxBy { row[it] }
-                    BooleanArray(SPEAKERS) { it in CLASSES[best] }
-                }
-            }
+        val y = runner(pcm16k, a, b - a)                     // [frames][7 classes], log-probabilities, flat
+        return Array(y.size / CLASSES.size) { f ->
+            val base = f * CLASSES.size
+            var best = 0
+            for (k in 1 until CLASSES.size) if (y[base + k] > y[base + best]) best = k
+            BooleanArray(SPEAKERS) { it in CLASSES[best] }
         }
     }
 
@@ -85,10 +92,10 @@ class Voices private constructor(private val env: OrtEnvironment, private val se
         return if (counts[best] > 0) best else null
     }
 
-    override fun close() { session.close() }
+    override fun close() = release()
 
     companion object {
-        const val FILE = "pyannote-segmentation-3.0.onnx"
+        const val FILE = "pyannote-segmentation-3.0.bin"
         private const val SAMPLE_RATE = 16_000
         /** The model's window: ten seconds, 589 frames of 270 samples. */
         private const val WINDOW = 160_000
@@ -105,10 +112,14 @@ class Voices private constructor(private val env: OrtEnvironment, private val se
             fromBytes(ctx.assets.open(FILE).use { it.readBytes() })
         }.getOrNull()
 
+        /** The detector on the C network, from the bytes of the .bin file. */
         fun fromBytes(bytes: ByteArray): Voices {
-            val env = OrtEnvironment.getEnvironment()
-            val options = OrtSession.SessionOptions().apply { setIntraOpNumThreads(1); setInterOpNumThreads(1) }
-            return Voices(env, env.createSession(bytes, options))
+            val ptr = VoicesLib.initModel(bytes)
+            require(ptr != 0L) { "not the segmentation model" }
+            return Voices(
+                runner = { pcm, offset, n -> VoicesLib.run(ptr, pcm, offset, n) ?: error("segmentation failed") },
+                release = { VoicesLib.freeModel(ptr) },
+            )
         }
     }
 }

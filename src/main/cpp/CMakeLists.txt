@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD 17)
 # whisper.cpp 1.9.4 and ggml's CPU backend, vendored in ./whisper.cpp (MIT), compiled
 # straight into one shared library per CPU flavour — ggml's own CMake cannot be
 # instantiated twice, and on arm64 we want two builds: a baseline one, and one with fp16
-# arithmetic that the loader picks when the CPU has it.
+# arithmetic that the loader picks when the CPU has it. The same library carries pyannet.c,
+# pyannote's segmentation network written out in C (see Voices), a few hundred kilobytes
+# where an inference engine would be forty megabytes per ABI.
 set(W ${CMAKE_SOURCE_DIR}/whisper.cpp)
 set(GGML_VERSION "0.9.7")
 set(GGML_BUILD_COMMIT "vendored")
@@ -30,7 +32,7 @@ endif ()
 find_library(LOG_LIB log)
 
 function(build_variant name)
-    add_library(${name} SHARED ${GGML_SOURCES} ${W}/src/whisper.cpp ${CMAKE_SOURCE_DIR}/jni.c)
+    add_library(${name} SHARED ${GGML_SOURCES} ${W}/src/whisper.cpp ${CMAKE_SOURCE_DIR}/pyannet.c ${CMAKE_SOURCE_DIR}/jni.c)
     target_include_directories(${name} PRIVATE ${CMAKE_BINARY_DIR}/gen ${W}/include ${W}/src ${W}/ggml/include ${W}/ggml/src ${W}/ggml/src/ggml-cpu)
     target_compile_definitions(${name} PRIVATE GGML_USE_CPU GGML_USE_LLAMAFILE _GNU_SOURCE WHISPER_VERSION="1.9.4")
     target_compile_options(${name} PRIVATE -O3 -fvisibility=hidden -fvisibility-inlines-hidden -ffunction-sections -fdata-sections -Wno-unused-function -Wno-unused-parameter ${ARGN})

@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdatomic.h>
 #include "whisper.h"
+#include "pyannet.h"
 
 #define TAG "ReadersWhisper"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
@@ -183,4 +184,50 @@ JNIEXPORT jstring JNICALL
 Java_com_freedomfighter_readers_speech_whisper_WhisperLib_systemInfo(JNIEnv *env, jclass cls) {
     (void) cls;
     return (*env)->NewStringUTF(env, whisper_print_system_info());
+}
+
+/* ── Voices: pyannote's segmentation network, in pyannet.c ───────────────────────────────── */
+
+JNIEXPORT jlong JNICALL
+Java_com_freedomfighter_readers_speech_whisper_VoicesLib_initModel(JNIEnv *env, jclass cls, jbyteArray bytes) {
+    (void) cls;
+    if (!bytes) return 0;
+    const jsize n = (*env)->GetArrayLength(env, bytes);
+    jbyte *data = (*env)->GetByteArrayElements(env, bytes, NULL);
+    if (!data) return 0;
+    pyannet *m = pyannet_load(data, (size_t) n);
+    (*env)->ReleaseByteArrayElements(env, bytes, data, JNI_ABORT);
+    if (!m) LOGI("voices: not the segmentation model (%d bytes)", (int) n);
+    return (jlong) m;
+}
+
+JNIEXPORT void JNICALL
+Java_com_freedomfighter_readers_speech_whisper_VoicesLib_freeModel(JNIEnv *env, jclass cls, jlong ptr) {
+    (void) env; (void) cls;
+    if (ptr) pyannet_free((pyannet *) ptr);
+}
+
+/** The network over pcm[offset, offset + n): frames × 7 log-probabilities, flat; null when it failed. */
+JNIEXPORT jfloatArray JNICALL
+Java_com_freedomfighter_readers_speech_whisper_VoicesLib_run(JNIEnv *env, jclass cls, jlong ptr, jfloatArray pcm, jint offset, jint n) {
+    (void) cls;
+    const pyannet *m = (const pyannet *) ptr;
+    if (!m || !pcm || offset < 0 || n <= 0 || offset + n > (*env)->GetArrayLength(env, pcm)) return NULL;
+    const int frames = pyannet_frames(m, n);
+    if (frames <= 0) return (*env)->NewFloatArray(env, 0);
+    /* only the window is copied out of the (possibly long) piece */
+    float *window = malloc((size_t) n * sizeof(float));
+    float *out = malloc((size_t) frames * PYANNET_CLASSES * sizeof(float));
+    jfloatArray result = NULL;
+    if (window && out) {
+        (*env)->GetFloatArrayRegion(env, pcm, offset, n, window);
+        int got = 0;
+        if (pyannet_run(m, window, n, out, &got) == 0 && got == frames) {
+            result = (*env)->NewFloatArray(env, frames * PYANNET_CLASSES);
+            if (result) (*env)->SetFloatArrayRegion(env, result, 0, frames * PYANNET_CLASSES, out);
+        }
+    }
+    free(window);
+    free(out);
+    return result;
 }

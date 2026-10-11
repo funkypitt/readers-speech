@@ -15,11 +15,12 @@ An Android library module, used as a git submodule by
 * A Silero voice detector, carried in the assets, keeps silence from being decoded (padding
   250 ms). Audio is decoded in pieces, so memory stays flat whatever the length.
 * Paragraphs where the speech breathes and where the voice changes: pyannote's segmentation
-  model alone (six megabytes, MIT, in the assets, run by ONNX Runtime) looks at ten seconds
-  around each gap between two lines and says whether another person speaks after it; a question
-  and its answer become two paragraphs, with no speaker labels. The same paragraph rule as the
-  desktop apps (pauses of 2 s, 0.9 s after a sentence, long paragraphs). About a minute of CPU
-  per hour of sound; without the model, the pauses decide alone (`docs/etudes/paragraphes-2026-10-11`).
+  model alone (six megabytes of weights, MIT, in the assets, run by a C implementation of the
+  network in the module — no inference engine) looks at ten seconds around each gap between two
+  lines and says whether another person speaks after it; a question and its answer become two
+  paragraphs, with no speaker labels. The same paragraph rule as the desktop apps (pauses of
+  2 s, 0.9 s after a sentence, long paragraphs). About a minute of CPU per hour of sound;
+  without the model, the pauses decide alone (`docs/etudes/paragraphes-2026-10-11`).
 * Main points: Qwen2.5-3B-Instruct (about 2 GB) — notes per part, then the theme, then the
   points. Refused on a phone with too little memory.
 * Translation: Gemma 3 4B (about 2.5 GB), in blocks that keep their place in the sound; needs

@@ -1,3 +1,8 @@
+pyannote-segmentation-3.0.bin holds the weights of pyannote/segmentation-3.0
+(https://huggingface.co/pyannote/segmentation-3.0), taken as they are from
+sherpa-onnx's ONNX export of that model by tools/export-pyannet.py; the network
+itself is run by src/main/cpp/pyannet.c. The model's licence:
+
 MIT License
 
 Copyright (c) 2022 CNRS
