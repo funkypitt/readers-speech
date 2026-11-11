@@ -180,6 +180,70 @@ Java_com_freedomfighter_readers_speech_whisper_WhisperLib_detectedLanguage(JNIEn
     return (*env)->NewStringUTF(env, s ? s : "");
 }
 
+/* ── Which language is spoken: whisper's own guess, one passage at a time ─────────────────── */
+
+JNIEXPORT jint JNICALL
+Java_com_freedomfighter_readers_speech_whisper_WhisperLib_languageCount(JNIEnv *env, jclass cls) {
+    (void) env; (void) cls;
+    return whisper_lang_max_id() + 1;
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_freedomfighter_readers_speech_whisper_WhisperLib_languageCode(JNIEnv *env, jclass cls, jint id) {
+    (void) cls;
+    const char *s = whisper_lang_str(id);
+    return (*env)->NewStringUTF(env, s ? s : "");
+}
+
+/** The probability of each language (indexed as languageCode) in the first thirty seconds of
+ *  [audio]; null on failure. One pass of the encoder, no decoding. */
+JNIEXPORT jfloatArray JNICALL
+Java_com_freedomfighter_readers_speech_whisper_WhisperLib_languageProbs(JNIEnv *env, jclass cls, jlong ptr, jint threads, jfloatArray audio) {
+    (void) cls;
+    struct whisper_context *ctx = (struct whisper_context *) ptr;
+    if (!ctx || !audio) return NULL;
+    const int count = whisper_lang_max_id() + 1;
+    float *probs = calloc((size_t) count, sizeof(float));
+    if (!probs) return NULL;
+    jfloat *data = (*env)->GetFloatArrayElements(env, audio, NULL);
+    const jsize n = (*env)->GetArrayLength(env, audio);
+    jfloatArray result = NULL;
+    if (whisper_pcm_to_mel(ctx, data, n, threads) == 0 && whisper_lang_auto_detect(ctx, 0, threads, probs) >= 0) {
+        result = (*env)->NewFloatArray(env, count);
+        if (result) (*env)->SetFloatArrayRegion(env, result, 0, count, probs);
+    }
+    (*env)->ReleaseFloatArrayElements(env, audio, data, JNI_ABORT);
+    free(probs);
+    return result;
+}
+
+/** The share (0–1) of [audio] in which Silero hears speech; −1 when the detector cannot be had. */
+JNIEXPORT jfloat JNICALL
+Java_com_freedomfighter_readers_speech_whisper_WhisperLib_speechShare(JNIEnv *env, jclass cls, jstring vadModel, jint threads, jfloatArray audio) {
+    (void) cls;
+    if (!vadModel || !audio) return -1.0f;
+    const char *path = (*env)->GetStringUTFChars(env, vadModel, NULL);
+    struct whisper_vad_context_params cp = whisper_vad_default_context_params();
+    cp.n_threads = threads;
+    cp.use_gpu = false;
+    struct whisper_vad_context *vctx = whisper_vad_init_from_file_with_params(path, cp);
+    (*env)->ReleaseStringUTFChars(env, vadModel, path);
+    if (!vctx) return -1.0f;
+    jfloat *data = (*env)->GetFloatArrayElements(env, audio, NULL);
+    const jsize n = (*env)->GetArrayLength(env, audio);
+    float share = -1.0f;
+    if (whisper_vad_detect_speech(vctx, data, n)) {
+        const int frames = whisper_vad_n_probs(vctx);
+        const float *p = whisper_vad_probs(vctx);
+        int speech = 0;
+        for (int i = 0; i < frames; i++) if (p[i] > 0.5f) speech++;
+        share = frames > 0 ? (float) speech / (float) frames : 0.0f;
+    }
+    (*env)->ReleaseFloatArrayElements(env, audio, data, JNI_ABORT);
+    whisper_vad_free(vctx);
+    return share;
+}
+
 JNIEXPORT jstring JNICALL
 Java_com_freedomfighter_readers_speech_whisper_WhisperLib_systemInfo(JNIEnv *env, jclass cls) {
     (void) cls;

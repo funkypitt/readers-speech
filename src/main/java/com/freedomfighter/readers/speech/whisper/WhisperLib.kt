@@ -17,6 +17,10 @@ object WhisperLib {
     @JvmStatic external fun segmentT1(ptr: Long, i: Int): Long
     @JvmStatic external fun detectedLanguage(ptr: Long): String
     @JvmStatic external fun systemInfo(): String
+    @JvmStatic external fun languageCount(): Int
+    @JvmStatic external fun languageCode(id: Int): String
+    @JvmStatic external fun languageProbs(ptr: Long, threads: Int, audio: FloatArray): FloatArray?
+    @JvmStatic external fun speechShare(vadModel: String, threads: Int, audio: FloatArray): Float
 }
 
 /** One line whisper heard; `newVoice` when another person starts speaking here (see [Voices]). */
@@ -75,6 +79,16 @@ class WhisperSession(modelPath: String, private val vadModelPath: String? = null
             return voices?.let { v -> runCatching { v.mark(pcm16k, segs) }.getOrDefault(segs) } ?: segs
         } finally { done.set(true); poll.interrupt() }
     }
+
+    /** How likely each language is in the first thirty seconds of [pcm16k] (code → 0–1); empty on failure. */
+    fun languageProbs(pcm16k: FloatArray): Map<String, Float> {
+        val p = WhisperLib.languageProbs(ptr, preferredThreads(), pcm16k) ?: return emptyMap()
+        return p.indices.associate { WhisperLib.languageCode(it) to p[it] }.filterKeys { it.isNotEmpty() }
+    }
+
+    /** The share of [pcm16k] that is speech (0–1); null when the detector cannot be had. */
+    fun speechShare(pcm16k: FloatArray): Float? =
+        vadModelPath?.let { WhisperLib.speechShare(it, preferredThreads(), pcm16k) }?.takeIf { it >= 0f }
 
     /** The language whisper found in the last piece (useful when it was left to detection). */
     fun language(): String = WhisperLib.detectedLanguage(ptr)
