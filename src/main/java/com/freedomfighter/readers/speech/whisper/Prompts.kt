@@ -16,8 +16,11 @@ object Prompts {
         "it" to "Buongiorno. Questa è una trascrizione accurata, con frasi complete, virgole e punti."
     )
 
-    /** Languages offered by hand: the phone's, English, detected (""), then the Reader's languages. */
-    fun choices(device: String): List<String> = listOf(device, "en", "", "fr", "de", "es", "pt", "ru", "it").distinct()
+    /**
+     * Languages offered: found by listening ("") first — the default, see [Language] — then the
+     * phone's, English, and the Reader's languages.
+     */
+    fun choices(device: String): List<String> = listOf("", device, "en", "fr", "de", "es", "pt", "ru", "it").distinct()
 
     /** The style sentence; none when the language is left to detection. */
     fun style(language: String?): String = language?.let { STYLE[it] } ?: ""
